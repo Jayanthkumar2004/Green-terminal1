@@ -72,27 +72,36 @@ export function App() {
         {activeTab === 'dashboard' && (
           <div className="space-y-4">
             <MetricsOverview />
-            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
             <RoomBoard onSelectRoom={handleSelectRoom} />
           </div>
         )}
 
         {activeTab === 'rooms' && (
           <div className="space-y-4">
+            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
             <RoomBoard onSelectRoom={handleSelectRoom} />
           </div>
         )}
 
         {activeTab === 'history' && (
-          <HistoryView />
+          <div className="space-y-4">
+            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
+            <HistoryView />
+          </div>
         )}
 
         {activeTab === 'admin' && (
-          <RoomAdminModal />
+          <div className="space-y-4">
+            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
+            <RoomAdminModal />
+          </div>
         )}
 
         {activeTab === 'bills' && (
-          <BillsList />
+          <div className="space-y-4">
+            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
+            <BillsList />
+          </div>
         )}
 
         {/* Room Action Panel Modal */}
