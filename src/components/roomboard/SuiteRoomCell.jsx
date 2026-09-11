@@ -1,9 +1,9 @@
 import React from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2, Wrench } from 'lucide-react';
 
 export const SuiteRoomCell = ({ room, onSelectRoom }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, setRoomMaintenance, now } = useHotel();
 
   if (!room) return null;
 
@@ -13,6 +13,7 @@ export const SuiteRoomCell = ({ room, onSelectRoom }) => {
   const isCheckedIn = Boolean(activeStay);
   const isBooked = !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isMaintenance = !isCheckedIn && !isBooked && room.status === 'MAINTENANCE';
 
   let bgStyle = 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 shadow-[4px_4px_10px_rgba(5,150,105,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
   
@@ -22,6 +23,8 @@ export const SuiteRoomCell = ({ room, onSelectRoom }) => {
     bgStyle = 'bg-rose-600 text-white border-rose-700 hover:bg-rose-700 shadow-[4px_4px_10px_rgba(225,29,72,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
   } else if (isCleaning) {
     bgStyle = 'bg-amber-400 text-slate-950 border-amber-500 hover:bg-amber-500 shadow-[4px_4px_10px_rgba(217,119,6,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
+  } else if (isMaintenance) {
+    bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
   }
 
   // Duration timer calculation
@@ -77,6 +80,20 @@ export const SuiteRoomCell = ({ room, onSelectRoom }) => {
             <button
               onClick={(e) => { e.stopPropagation(); markRoomClean(room.id); }}
               className="text-xs font-black bg-slate-950 hover:bg-slate-900 text-white px-2.5 py-1 rounded shadow uppercase flex items-center gap-1"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>MARK AVAILABLE</span>
+            </button>
+          </div>
+        ) : isMaintenance ? (
+          <div className="flex items-center gap-2">
+            <span className="font-black text-xs uppercase text-white flex items-center gap-1">
+              <Wrench className="w-3.5 h-3.5 animate-pulse" />
+              UNDER MAINTENANCE
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setRoomMaintenance(room.id, false); }}
+              className="text-xs font-black bg-black/40 hover:bg-black/60 text-white px-2.5 py-1 rounded shadow uppercase flex items-center gap-1"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>MARK AVAILABLE</span>

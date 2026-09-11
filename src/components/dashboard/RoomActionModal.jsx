@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { X, CalendarCheck, UserCheck, LogOut, Receipt, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save } from 'lucide-react';
+import { X, CalendarCheck, UserCheck, LogOut, Receipt, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
 
 export const RoomActionModal = ({ 
   room, 
@@ -10,7 +10,7 @@ export const RoomActionModal = ({
   onOpenCheckOut, 
   onGenerateBill 
 }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, markRoomCleaning, editActiveStay, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, markRoomCleaning, setRoomMaintenance, editActiveStay, now } = useHotel();
 
   if (!room) return null;
 
@@ -20,6 +20,7 @@ export const RoomActionModal = ({
   const isCheckedIn = Boolean(activeStay);
   const isBooked = !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isMaintenance = !isCheckedIn && !isBooked && room.status === 'MAINTENANCE';
 
   // Edit Active Stay Form State
   const [isEditingStay, setIsEditingStay] = useState(false);
@@ -53,6 +54,7 @@ export const RoomActionModal = ({
     if (isCheckedIn) return <span className="bg-blue-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm">CHECKED-IN (BLUE)</span>;
     if (isBooked) return <span className="bg-rose-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm">BOOKED (RED)</span>;
     if (isCleaning) return <span className="bg-amber-400 text-slate-950 font-black px-3 py-1 rounded-full text-xs shadow-sm flex items-center gap-1"><Sparkles className="w-3.5 h-3.5" /> YET TO CLEAN (YELLOW)</span>;
+    if (isMaintenance) return <span className="bg-orange-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm flex items-center gap-1"><Wrench className="w-3.5 h-3.5" /> MAINTENANCE (ORANGE)</span>;
     return <span className="bg-emerald-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm">AVAILABLE (GREEN)</span>;
   };
 
@@ -130,6 +132,26 @@ export const RoomActionModal = ({
               >
                 <CheckCircle2 className="w-5 h-5" />
                 <span>MARK CLEANED (MAKE AVAILABLE / GREEN)</span>
+              </button>
+            </div>
+          )}
+
+          {/* Special Maintenance Banner if room is MAINTENANCE */}
+          {isMaintenance && (
+            <div className="bg-orange-100 dark:bg-orange-950/60 p-4 rounded-xl border-2 border-orange-400 dark:border-orange-600 space-y-3 text-center">
+              <div className="flex items-center justify-center gap-2 text-orange-950 dark:text-orange-100 font-black text-sm uppercase">
+                <Wrench className="w-5 h-5 text-orange-600 dark:text-orange-400 animate-bounce" />
+                <span>Room is currently Under Maintenance</span>
+              </div>
+              <p className="text-xs text-orange-900 dark:text-orange-200 font-medium">
+                Is room maintenance/repair complete? Click below to restore to Available.
+              </p>
+              <button
+                onClick={() => { setRoomMaintenance(room.id, false); onClose(); }}
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs uppercase shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                <span>CLEAR MAINTENANCE (MAKE AVAILABLE / GREEN)</span>
               </button>
             </div>
           )}
@@ -338,6 +360,25 @@ export const RoomActionModal = ({
               <Sparkles className="w-4 h-4" />
               <span>SET ROOM AS YET TO CLEAN (YELLOW)</span>
             </button>
+
+            {/* BUTTON MAINTENANCE */}
+            {isMaintenance ? (
+              <button
+                onClick={() => { setRoomMaintenance(room.id, false); onClose(); }}
+                className="col-span-2 flex items-center justify-center gap-2 p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md transition-all"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>CLEAR MAINTENANCE (MAKE AVAILABLE / GREEN)</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => { setRoomMaintenance(room.id, true); onClose(); }}
+                className="col-span-2 flex items-center justify-center gap-2 p-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black shadow-md transition-all"
+              >
+                <Wrench className="w-4 h-4" />
+                <span>SET ROOM UNDER MAINTENANCE (ORANGE)</span>
+              </button>
+            )}
           </div>
         </div>
 

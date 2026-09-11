@@ -13,14 +13,14 @@ CREATE TABLE IF NOT EXISTS rooms (
     room_number VARCHAR(20) NOT NULL UNIQUE,
     room_type VARCHAR(20) NOT NULL CHECK (room_type IN ('AC', 'NON_AC', 'SUITE')),
     rate DECIMAL(10, 2) NOT NULL DEFAULT 1425.00,
-    status VARCHAR(30) NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'BOOKED', 'CHECKED_IN', 'CHECK_OUT', 'OUT_FOR_CLEANING', 'YET_TO_CLEAN')),
+    status VARCHAR(30) NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'BOOKED', 'CHECKED_IN', 'CHECK_OUT', 'OUT_FOR_CLEANING', 'YET_TO_CLEAN', 'MAINTENANCE')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Update constraint for existing rooms table
 ALTER TABLE rooms DROP CONSTRAINT IF EXISTS rooms_status_check;
-ALTER TABLE rooms ADD CONSTRAINT rooms_status_check CHECK (status IN ('AVAILABLE', 'BOOKED', 'CHECKED_IN', 'CHECK_OUT', 'OUT_FOR_CLEANING', 'YET_TO_CLEAN'));
+ALTER TABLE rooms ADD CONSTRAINT rooms_status_check CHECK (status IN ('AVAILABLE', 'BOOKED', 'CHECKED_IN', 'CHECK_OUT', 'OUT_FOR_CLEANING', 'YET_TO_CLEAN', 'MAINTENANCE'));
 
 -- ---------------------------------------------------------
 -- 2. BOOKINGS TABLE

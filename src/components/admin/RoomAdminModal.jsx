@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { Plus, Edit2, Trash2, ShieldAlert, Check, X, DoorClosed } from 'lucide-react';
+import { Plus, Edit2, Trash2, ShieldAlert, Check, X, DoorClosed, Wrench } from 'lucide-react';
 
 export const RoomAdminModal = () => {
-  const { rooms, addRoom, editRoom, deleteRoom } = useHotel();
+  const { rooms, addRoom, editRoom, deleteRoom, setRoomMaintenance } = useHotel();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
@@ -263,12 +263,34 @@ export const RoomAdminModal = () => {
                   <td className="p-3">
                     <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
                       r.status === 'CHECKED_IN' ? 'bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300' :
-                      r.status === 'BOOKED' ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' : 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
+                      r.status === 'BOOKED' ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300' :
+                      r.status === 'YET_TO_CLEAN' || r.status === 'OUT_FOR_CLEANING' ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' :
+                      r.status === 'MAINTENANCE' ? 'bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-300' :
+                      'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
                     }`}>
                       {r.status}
                     </span>
                   </td>
                   <td className="p-3 text-right space-x-2">
+                    {r.status === 'MAINTENANCE' ? (
+                      <button
+                        onClick={() => setRoomMaintenance(r.id, false)}
+                        className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 rounded font-bold text-[11px] inline-flex items-center gap-1"
+                        title="Clear maintenance and make room available"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Clear Maintenance</span>
+                      </button>
+                    ) : r.status === 'AVAILABLE' ? (
+                      <button
+                        onClick={() => setRoomMaintenance(r.id, true)}
+                        className="px-2.5 py-1 bg-orange-50 dark:bg-orange-950/60 hover:bg-orange-100 dark:hover:bg-orange-900 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 rounded font-bold text-[11px] inline-flex items-center gap-1"
+                        title="Set room status under maintenance"
+                      >
+                        <Wrench className="w-3.5 h-3.5" />
+                        <span>Maintenance</span>
+                      </button>
+                    ) : null}
                     <button
                       onClick={() => startEdit(r)}
                       className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded font-bold text-[11px] inline-flex items-center gap-1"

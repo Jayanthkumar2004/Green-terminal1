@@ -1,9 +1,9 @@
 import React from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { Sparkles, CheckCircle2, Clock } from 'lucide-react';
+import { Sparkles, CheckCircle2, Clock, Wrench } from 'lucide-react';
 
 export const RoomCell = ({ room, onSelectRoom }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, setRoomMaintenance, now } = useHotel();
 
   const activeStay = getRoomActiveStay(room.id);
   const activeBooking = getRoomActiveBooking(room.id);
@@ -11,6 +11,7 @@ export const RoomCell = ({ room, onSelectRoom }) => {
   const isCheckedIn = Boolean(activeStay);
   const isBooked = !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isMaintenance = !isCheckedIn && !isBooked && room.status === 'MAINTENANCE';
 
   // Deep Bold 3D Claymorphic Color Scheme
   let bgStyle = 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 shadow-[4px_4px_10px_rgba(5,150,105,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // GREEN for AVAILABLE
@@ -21,6 +22,8 @@ export const RoomCell = ({ room, onSelectRoom }) => {
     bgStyle = 'bg-rose-600 text-white border-rose-700 hover:bg-rose-700 shadow-[4px_4px_10px_rgba(225,29,72,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // RED for BOOKED
   } else if (isCleaning) {
     bgStyle = 'bg-amber-400 text-slate-950 border-amber-500 hover:bg-amber-500 shadow-[4px_4px_10px_rgba(217,119,6,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // YELLOW for YET TO CLEAN
+  } else if (isMaintenance) {
+    bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // ORANGE for MAINTENANCE
   }
 
   // Format Room Type
@@ -104,6 +107,21 @@ export const RoomCell = ({ room, onSelectRoom }) => {
               <span>AVAILABLE</span>
             </button>
           </div>
+        ) : isMaintenance ? (
+          <div className="flex items-center justify-between gap-1">
+            <div className="text-[10px] font-black text-white uppercase tracking-tight flex items-center gap-0.5">
+              <Wrench className="w-3 h-3 text-white animate-pulse" />
+              MAINTENANCE
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setRoomMaintenance(room.id, false); }}
+              className="text-[8px] font-black bg-black/40 hover:bg-black/60 text-white px-1.5 py-0.5 rounded shadow uppercase flex items-center gap-0.5"
+              title="Click to clear maintenance and mark AVAILABLE (GREEN)"
+            >
+              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+              <span>AVAILABLE</span>
+            </button>
+          </div>
         ) : (
           <div className="text-[11px] font-black tracking-wider uppercase text-center opacity-95">
             AVAILABLE
@@ -127,6 +145,8 @@ export const RoomCell = ({ room, onSelectRoom }) => {
           <span className="font-black text-[8px] opacity-90">RESERVED</span>
         ) : isCleaning ? (
           <span className="font-black text-[8px] text-slate-950">CLEANING REQUIRED</span>
+        ) : isMaintenance ? (
+          <span className="font-black text-[8px] text-white">UNDER REPAIR</span>
         ) : (
           <span className="font-black text-[8px] opacity-90">READY</span>
         )}

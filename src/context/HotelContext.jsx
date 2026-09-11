@@ -328,6 +328,14 @@ export const HotelProvider = ({ children }) => {
     setRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: 'YET_TO_CLEAN' } : r));
   };
 
+  const setRoomMaintenance = async (roomId, isMaintenance = true) => {
+    const nextStatus = isMaintenance ? 'MAINTENANCE' : 'AVAILABLE';
+    if (isSupabaseConfigured && supabase && isUUID(roomId)) {
+      await supabase.from('rooms').update({ status: nextStatus }).eq('id', roomId);
+    }
+    setRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: nextStatus } : r));
+  };
+
   // BOOKING ACTIONS
   const createBooking = async (bookingData) => {
     const newBooking = {
@@ -630,6 +638,7 @@ export const HotelProvider = ({ children }) => {
       deleteRoom,
       markRoomClean,
       markRoomCleaning,
+      setRoomMaintenance,
       stays,
       bookings,
       bills,

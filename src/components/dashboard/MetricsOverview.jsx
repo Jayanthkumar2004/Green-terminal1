@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { DoorClosed, CheckCircle2, BookmarkCheck, UserCheck, Sparkles } from 'lucide-react';
+import { DoorClosed, CheckCircle2, BookmarkCheck, UserCheck, Sparkles, Wrench } from 'lucide-react';
 
 export const MetricsOverview = () => {
   const { rooms, stays, bookings } = useHotel();
@@ -12,13 +12,15 @@ export const MetricsOverview = () => {
   const yetToCleanCount = rooms.filter(r => 
     r.status === 'OUT_FOR_CLEANING' || r.status === 'YET_TO_CLEAN'
   ).length;
+  const maintenanceCount = rooms.filter(r => r.status === 'MAINTENANCE').length;
 
-  // Available rooms are strictly those without active check-in, booking, or cleaning requirement
+  // Available rooms are strictly those without active check-in, booking, cleaning, or maintenance requirement
   const availableCount = rooms.filter(r => {
     const isStay = stays.some(s => s.room_id === r.id && s.status === 'CHECKED_IN');
     const isBooked = bookings.some(b => b.room_id === r.id && b.status === 'ACTIVE');
     const isCleaning = r.status === 'OUT_FOR_CLEANING' || r.status === 'YET_TO_CLEAN';
-    return !isStay && !isBooked && !isCleaning;
+    const isMaintenance = r.status === 'MAINTENANCE';
+    return !isStay && !isBooked && !isCleaning && !isMaintenance;
   }).length;
 
   const stats = [
@@ -61,11 +63,19 @@ export const MetricsOverview = () => {
       bgColor: 'bg-amber-50 dark:bg-amber-950/60',
       textColor: 'text-amber-800 dark:text-amber-300',
       borderColor: 'border-amber-300 dark:border-amber-700'
+    },
+    {
+      title: 'MAINTENANCE',
+      value: maintenanceCount,
+      icon: Wrench,
+      bgColor: 'bg-orange-50 dark:bg-orange-950/60',
+      textColor: 'text-orange-800 dark:text-orange-300',
+      borderColor: 'border-orange-300 dark:border-orange-700'
     }
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3.5 no-print">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3.5 no-print">
       {stats.map((stat, idx) => {
         const Icon = stat.icon;
         return (
