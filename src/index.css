@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #cbd5e1;
+  color: #0f172a;
+}
+
+html.dark body, body.dark {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+@layer utilities {
+  /* Soft Tactile Claymorphism rules */
+  .clay-card {
+    background: rgba(248, 250, 252, 0.95);
+    color: #0f172a;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 
+      8px 8px 20px rgba(165, 175, 190, 0.35),
+      -8px -8px 20px rgba(255, 255, 255, 0.95),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .dark .clay-card {
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #1e293b;
+    box-shadow: 
+      8px 8px 20px rgba(0, 0, 0, 0.65),
+      -6px -6px 16px rgba(30, 41, 59, 0.45),
+      inset 1px 1px 2px rgba(51, 65, 85, 0.4),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .clay-card-dark {
+    background: #0f172a;
+    color: #f8fafc;
+    border-radius: 1.25rem;
+    box-shadow: 
+      8px 8px 20px rgba(0, 0, 0, 0.7),
+      -6px -6px 16px rgba(30, 41, 59, 0.5);
+  }
+
+  .clay-btn {
+    transition: all 0.2s ease-in-out;
+    border-radius: 0.75rem;
+    box-shadow: 
+      4px 4px 10px rgba(160, 170, 185, 0.35),
+      -4px -4px 10px rgba(255, 255, 255, 0.9);
+  }
+
+  .clay-btn:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 
+      6px 6px 14px rgba(160, 170, 185, 0.45),
+      -6px -6px 14px rgba(255, 255, 255, 1);
+  }
+
+  .clay-btn:active {
+    transform: translateY(0);
+    box-shadow: 
+      inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+      inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+  }
+
+  .clay-input {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    box-shadow: 
+      inset 3px 3px 6px rgba(0, 0, 0, 0.07),
+      inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+  }
+
+  .dark .clay-input {
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    box-shadow: 
+      inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+      inset -2px -2px 4px rgba(51, 65, 85, 0.3);
+  }
+
+  .clay-input:focus {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #0284c7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+  }
+
+  .dark .clay-input:focus {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #38bdf8;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  }
+
+  option {
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+
+  .dark option {
+    background-color: #1e293b;
+    color: #f8fafc;
+  }
+}
+
+/* Room Board Grid styling - Preserves Physical Status Board Appearance */
+.room-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background-color: #475569; /* Thin grid border lines */
+  border: 1px solid #334155;
+}
+
+.dark .room-grid-7 {
+  background-color: #334155;
+  border-color: #1e293b;
+}
+
+@media (max-width: 1024px) {
+  .room-grid-7 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .room-grid-7 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Print Styles for Invoice */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-invoice, #printable-invoice * {
+    visibility: visible;
+  }
+  #printable-invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 15px;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
