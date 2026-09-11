@@ -17,10 +17,10 @@ export const RoomActionModal = ({
   const activeStay = getRoomActiveStay(room.id);
   const activeBooking = getRoomActiveBooking(room.id);
 
-  const isCheckedIn = Boolean(activeStay);
-  const isBooked = !isCheckedIn && Boolean(activeBooking);
-  const isCleaning = !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
-  const isMaintenance = !isCheckedIn && !isBooked && room.status === 'MAINTENANCE';
+  const isMaintenance = room.status === 'MAINTENANCE';
+  const isCheckedIn = !isMaintenance && Boolean(activeStay);
+  const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
+  const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
 
   // Edit Active Stay Form State
   const [isEditingStay, setIsEditingStay] = useState(false);

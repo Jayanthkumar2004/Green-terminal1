@@ -330,10 +330,51 @@ export const HotelProvider = ({ children }) => {
 
   const setRoomMaintenance = async (roomId, isMaintenance = true) => {
     const nextStatus = isMaintenance ? 'MAINTENANCE' : 'AVAILABLE';
-    if (isSupabaseConfigured && supabase && isUUID(roomId)) {
-      await supabase.from('rooms').update({ status: nextStatus }).eq('id', roomId);
+
+    const roomObj = rooms.find(r => r.id === roomId || r.room_number === roomId);
+    const actualRoomId = roomObj ? roomObj.id : roomId;
+    const roomNumber = roomObj ? roomObj.room_number : roomId;
+
+    if (isMaintenance) {
+      // Clear active stay if any so room turns orange without conflict
+      const activeStay = stays.find(s => 
+        (s.room_id === actualRoomId || s.room_id === roomId || s.room_number === roomNumber) && s.status === 'CHECKED_IN'
+      );
+      if (activeStay) {
+        const checkOutTime = new Date().toISOString();
+        if (isSupabaseConfigured && supabase && isUUID(activeStay.id)) {
+          await supabase.from('stays').update({ status: 'CHECKED_OUT', check_out: checkOutTime }).eq('id', activeStay.id);
+        }
+        setStays(prev => prev.map(s => s.id === activeStay.id ? { ...s, status: 'CHECKED_OUT', check_out: checkOutTime } : s));
+      }
+
+      // Clear active booking if any
+      const activeBooking = bookings.find(b => 
+        (b.room_id === actualRoomId || b.room_id === roomId || b.room_number === roomNumber) && b.status === 'ACTIVE'
+      );
+      if (activeBooking) {
+        if (isSupabaseConfigured && supabase && isUUID(activeBooking.id)) {
+          await supabase.from('bookings').update({ status: 'COMPLETED' }).eq('id', activeBooking.id);
+        }
+        setBookings(prev => prev.map(b => b.id === activeBooking.id ? { ...b, status: 'COMPLETED' } : b));
+      }
     }
-    setRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: nextStatus } : r));
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        if (isUUID(actualRoomId)) {
+          const { error } = await supabase.from('rooms').update({ status: nextStatus }).eq('id', actualRoomId);
+          if (error) console.error('Supabase room status update error:', error.message);
+        } else {
+          const { error } = await supabase.from('rooms').update({ status: nextStatus }).eq('room_number', roomNumber);
+          if (error) console.error('Supabase room status update error by room_number:', error.message);
+        }
+      } catch (err) {
+        console.error('Error in setRoomMaintenance Supabase call:', err);
+      }
+    }
+
+    setRooms(prev => prev.map(r => (r.id === roomId || r.room_number === roomNumber) ? { ...r, status: nextStatus } : r));
   };
 
   // BOOKING ACTIONS

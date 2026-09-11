@@ -8,22 +8,22 @@ export const RoomCell = ({ room, onSelectRoom }) => {
   const activeStay = getRoomActiveStay(room.id);
   const activeBooking = getRoomActiveBooking(room.id);
 
-  const isCheckedIn = Boolean(activeStay);
-  const isBooked = !isCheckedIn && Boolean(activeBooking);
-  const isCleaning = !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
-  const isMaintenance = !isCheckedIn && !isBooked && room.status === 'MAINTENANCE';
+  const isMaintenance = room.status === 'MAINTENANCE';
+  const isCheckedIn = !isMaintenance && Boolean(activeStay);
+  const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
+  const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
 
   // Deep Bold 3D Claymorphic Color Scheme
   let bgStyle = 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 shadow-[4px_4px_10px_rgba(5,150,105,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // GREEN for AVAILABLE
 
-  if (isCheckedIn) {
+  if (isMaintenance) {
+    bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // ORANGE for MAINTENANCE
+  } else if (isCheckedIn) {
     bgStyle = 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700 shadow-[4px_4px_10px_rgba(37,99,235,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // BLUE for CHECKED-IN
   } else if (isBooked) {
     bgStyle = 'bg-rose-600 text-white border-rose-700 hover:bg-rose-700 shadow-[4px_4px_10px_rgba(225,29,72,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // RED for BOOKED
   } else if (isCleaning) {
     bgStyle = 'bg-amber-400 text-slate-950 border-amber-500 hover:bg-amber-500 shadow-[4px_4px_10px_rgba(217,119,6,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // YELLOW for YET TO CLEAN
-  } else if (isMaintenance) {
-    bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // ORANGE for MAINTENANCE
   }
 
   // Format Room Type

@@ -76,6 +76,10 @@ export const RoomBoard = ({ onSelectRoom }) => {
             <div className="w-2.5 h-2.5 bg-slate-950 rounded-xs"></div>
             <span>Yet to Clean (Yellow)</span>
           </div>
+          <div className="flex items-center gap-1 px-2.5 py-1 bg-orange-600 text-white rounded-md shadow-sm">
+            <div className="w-2.5 h-2.5 bg-white rounded-xs"></div>
+            <span>Maintenance (Orange)</span>
+          </div>
         </div>
       </div>
 
