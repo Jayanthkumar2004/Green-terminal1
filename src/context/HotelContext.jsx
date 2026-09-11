@@ -470,6 +470,19 @@ export const HotelProvider = ({ children }) => {
     setStays(prev => prev.map(s => s.id === stayId ? { ...s, ...updatedFields } : s));
   };
 
+  // CONTINUE STAY FOR CURRENT 24H CYCLE
+  const continueStayCycle = async (stayId, cycleNumber) => {
+    if (isSupabaseConfigured && supabase && isUUID(stayId)) {
+      try {
+        const { error } = await supabase.from('stays').update({ dismissed_checkout_cycle: cycleNumber }).eq('id', stayId);
+        if (error) console.warn('Supabase update dismissed_checkout_cycle note:', error.message);
+      } catch (err) {
+        console.warn('Supabase dismissed_checkout_cycle error:', err);
+      }
+    }
+    setStays(prev => prev.map(s => s.id === stayId ? { ...s, dismissed_checkout_cycle: cycleNumber } : s));
+  };
+
   // CHECK-OUT ACTIONS
   const checkOutGuest = async (roomId, checkOutTime = new Date().toISOString(), nextStatus = 'YET_TO_CLEAN') => {
     const activeStay = stays.find(s => s.room_id === roomId && s.status === 'CHECKED_IN');
@@ -686,6 +699,7 @@ export const HotelProvider = ({ children }) => {
       createBooking,
       checkInGuest,
       editActiveStay,
+      continueStayCycle,
       checkOutGuest,
       generateBill,
       deleteStay,

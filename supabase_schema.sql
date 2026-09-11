@@ -53,8 +53,12 @@ CREATE TABLE IF NOT EXISTS stays (
     status VARCHAR(20) DEFAULT 'CHECKED_IN' CHECK (status IN ('CHECKED_IN', 'CHECKED_OUT')),
     billable_days INT DEFAULT 1,
     room_rate DECIMAL(10, 2) NOT NULL,
+    dismissed_checkout_cycle INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Migration for existing stays table
+ALTER TABLE stays ADD COLUMN IF NOT EXISTS dismissed_checkout_cycle INT DEFAULT 0;
 
 -- ---------------------------------------------------------
 -- 4. BILLS TABLE

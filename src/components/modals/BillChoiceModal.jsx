@@ -241,10 +241,10 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
-                    Room Rate (₹)
+                    Room Rate (₹) *
                   </label>
                   <input
                     type="number"
@@ -257,12 +257,27 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
-                    Manual Total Amount (₹) (Optional Override)
+                    Day Count *
                   </label>
                   <input
                     type="number"
+                    min="1"
+                    required
                     className="clay-input w-full px-3 py-1.5 text-xs font-black text-emerald-700 dark:text-emerald-400"
-                    placeholder="e.g. 3000"
+                    placeholder="e.g. 2 or 3"
+                    value={manualData.billable_days}
+                    onChange={(e) => setManualData({ ...manualData, billable_days: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
+                    Total Override (₹)
+                  </label>
+                  <input
+                    type="number"
+                    className="clay-input w-full px-3 py-1.5 text-xs font-bold"
+                    placeholder={`e.g. ${Math.round((parseFloat(manualData.room_rate) || 1425) * (parseInt(manualData.billable_days, 10) || 1))}`}
                     value={manualData.manual_grand_total}
                     onChange={(e) => setManualData({ ...manualData, manual_grand_total: e.target.value })}
                   />

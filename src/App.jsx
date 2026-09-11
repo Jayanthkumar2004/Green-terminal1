@@ -13,6 +13,7 @@ import { RoomAdminModal } from './components/admin/RoomAdminModal';
 import { BillsList } from './components/billing/BillsList';
 import { HistoryView } from './components/history/HistoryView';
 import { BillChoiceModal } from './components/modals/BillChoiceModal';
+import { ReadyToCheckoutSection } from './components/dashboard/ReadyToCheckoutSection';
 
 export function App() {
   const { user, getRoomActiveStay, theme } = useHotel();
@@ -23,12 +24,10 @@ export function App() {
   const [bookingRoom, setBookingRoom] = useState(null);
   const [checkInRoom, setCheckInRoom] = useState(null);
   const [checkOutRoom, setCheckOutRoom] = useState(null);
-
-  // Bill Choice Modal state
-  const [billChoiceData, setBillChoiceData] = useState(null); // { stay, room }
   
   // Invoice Modal state
   const [invoiceData, setInvoiceData] = useState(null); // { stay, room, customBillData }
+  const [billChoiceData, setBillChoiceData] = useState(null); // { stay, room }
 
   if (!user) {
     return <AuthModal />;
@@ -73,6 +72,7 @@ export function App() {
         {activeTab === 'dashboard' && (
           <div className="space-y-4">
             <MetricsOverview />
+            <ReadyToCheckoutSection onOpenCheckOut={(room) => setCheckOutRoom(room)} />
             <RoomBoard onSelectRoom={handleSelectRoom} />
           </div>
         )}
