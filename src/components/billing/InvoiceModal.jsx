@@ -161,11 +161,11 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
         </div>
 
         {/* PRINTABLE INVOICE CONTENT */}
-        <div id="printable-invoice" className="p-8 md:p-12 bg-white text-slate-900 font-sans text-xs leading-snug">
+        <div id="printable-invoice" className="p-8 md:p-12 print:p-0 bg-white text-slate-900 font-sans text-xs leading-snug">
           
           {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-xl md:text-2xl font-serif tracking-widest text-slate-900 font-bold uppercase mb-3">
+          <div className="text-center mb-6 print:mb-3">
+            <h1 className="text-xl md:text-2xl font-serif tracking-widest text-slate-900 font-bold uppercase mb-3 print:mb-1">
               HOTEL GREEN TERMINAL
             </h1>
             <h2 className="text-[11px] font-bold font-sans tracking-wider uppercase text-slate-800">
@@ -174,7 +174,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Customer & Room Info Table */}
-          <div className="border border-slate-900 mb-6 grid grid-cols-1 md:grid-cols-2">
+          <div className="border border-slate-900 mb-6 print:mb-3 grid grid-cols-1 md:grid-cols-2">
             
             {/* Left Box: Name & Address */}
             <div className="p-3 border-b md:border-b-0 md:border-r border-slate-900 space-y-0.5">
@@ -246,7 +246,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Charges Breakdown Table */}
-          <table className="w-full border-collapse border border-slate-900 font-sans text-xs mb-6">
+          <table className="w-full border-collapse border border-slate-900 font-sans text-xs mb-6 print:mb-3">
             <thead>
               <tr className="border-b border-slate-900 font-bold">
                 <th className="border-r border-slate-900 p-1.5 text-center">Description</th>
@@ -298,7 +298,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </table>
 
           {/* Pay Mode & Words */}
-          <div className="space-y-1 mb-16 font-sans">
+          <div className="space-y-1 mb-6 print:mb-3 font-sans">
             <div className="text-xs font-bold uppercase">
               Pay Mode : <span className="font-mono">{payMode}</span>
             </div>
@@ -308,7 +308,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Room Key & Signatures Row */}
-          <div className="grid grid-cols-2 gap-4 font-sans text-[10px] items-end mb-8">
+          <div className="grid grid-cols-2 gap-4 font-sans text-[10px] items-end mb-4 print:mb-2">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-[10px]">Please deposit your room key</span>
@@ -329,7 +329,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* User Id & Page Row */}
-          <div className="flex justify-between items-center text-[10px] font-sans font-bold text-slate-800 mb-6">
+          <div className="flex justify-between items-center text-[10px] font-sans font-bold text-slate-800 mb-4 print:mb-2">
             <div>User Id : <span className="font-mono ml-4">FOM</span></div>
             <div>Page: <br /> 1 / 1</div>
           </div>

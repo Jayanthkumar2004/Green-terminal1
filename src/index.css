@@ -144,11 +144,11 @@ html.dark body, body.dark {
   }
 }
 
-/* Print Styles for Invoice - Single A4 Page, No Overflow, No Black Background */
+/* Print Styles for Invoice - Single A4 Page, No Top Cutoff, No Extra Page, No Black Background */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 10mm 12mm;
   }
 
   html, 
@@ -188,13 +188,13 @@ html.dark body, body.dark {
   }
 
   #printable-invoice {
-    position: absolute !important;
+    position: relative !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 24px 32px !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
@@ -202,8 +202,10 @@ html.dark body, body.dark {
     color: #000000 !important;
     box-sizing: border-box !important;
     page-break-after: avoid !important;
+    page-break-before: avoid !important;
     page-break-inside: avoid !important;
     break-after: avoid !important;
+    break-before: avoid !important;
     break-inside: avoid !important;
   }
 
