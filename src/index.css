@@ -144,26 +144,84 @@ html.dark body, body.dark {
   }
 }
 
-/* Print Styles for Invoice */
+/* Print Styles for Invoice - Single A4 Page, No Overflow, No Black Background */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, 
+  body, 
+  #root,
+  body.dark,
+  html.dark body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  #printable-invoice, #printable-invoice * {
-    visibility: visible;
-  }
-  #printable-invoice {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 15px;
-    box-shadow: none !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-  .no-print {
+
+  .no-print,
+  .no-print * {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #printable-invoice, 
+  #printable-invoice * {
+    visibility: visible !important;
+  }
+
+  #printable-invoice {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px 32px !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-sizing: border-box !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Preserve layout display modes within printable invoice */
+  #printable-invoice .grid {
+    display: grid !important;
+  }
+  #printable-invoice .flex {
+    display: flex !important;
+  }
+  #printable-invoice table {
+    display: table !important;
+  }
+  #printable-invoice tr {
+    display: table-row !important;
+  }
+  #printable-invoice td, 
+  #printable-invoice th {
+    display: table-cell !important;
   }
 }
