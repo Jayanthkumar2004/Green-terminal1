@@ -19,7 +19,14 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
   const checkOutDate = stay?.check_out ? new Date(stay.check_out) : (initialBill?.check_out ? new Date(initialBill.check_out) : new Date());
 
   const durationHours = Math.max(0, (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60));
-  const billableDays = stay?.billable_days || initialBill?.billable_days || Math.max(1, Math.ceil(durationHours / 24));
+
+  // Authoritative billable days calculation:
+  // 1. Saved historical bill: initialBill.billable_days
+  // 2. Explicit custom bill entry: customBillData.billable_days
+  // 3. Computed dynamically from durationHours: Math.max(1, Math.ceil(durationHours / 24))
+  const billableDays = initialBill?.billable_days 
+    || (customBillData?.billable_days ? parseInt(customBillData.billable_days, 10) : null)
+    || Math.max(1, Math.ceil(durationHours / 24));
 
   const [regNumber, setRegNumber] = useState(customBillData?.reg_number || initialBill?.reg_number || '7732');
   const [payMode, setPayMode] = useState(customBillData?.payment_method || initialBill?.payment_method || 'CARD PAID');

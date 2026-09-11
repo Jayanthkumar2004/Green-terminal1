@@ -8,6 +8,12 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
   const defaultCheckIn = stay?.check_in ? new Date(stay.check_in).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
   const defaultCheckOut = stay?.check_out ? new Date(stay.check_out).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
 
+  const checkInMs = stay?.check_in ? new Date(stay.check_in).getTime() : new Date().getTime();
+  const checkOutMs = stay?.check_out ? new Date(stay.check_out).getTime() : new Date().getTime();
+  const autoDurationHours = Math.max(0, (checkOutMs - checkInMs) / (1000 * 60 * 60));
+  const autoBillableDays = Math.max(1, Math.ceil(autoDurationHours / 24));
+  const activeRate = room?.rate || stay?.room_rate || 1425;
+
   const [manualData, setManualData] = useState({
     guest_name: stay?.guest_name || '',
     phone: stay?.phone || '',
@@ -15,9 +21,10 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
     gst_number: stay?.gst_number || '',
     room_number: room?.room_number || stay?.room_number || '1003',
     room_type: room?.room_type || 'AC',
-    room_rate: room?.rate || stay?.room_rate || 1425,
+    room_rate: activeRate,
     check_in: defaultCheckIn,
     check_out: defaultCheckOut,
+    billable_days: String(autoBillableDays),
     reg_number: '7732',
     payment_method: 'CARD PAID',
     manual_grand_total: ''
@@ -42,17 +49,18 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
           gst_number: manualData.gst_number,
           check_in: manualData.check_in,
           check_out: manualData.check_out,
-          room_rate: parseFloat(manualData.room_rate) || 1425
+          room_rate: parseFloat(manualData.room_rate) || activeRate
         },
         room: {
           ...room,
           room_number: manualData.room_number,
           room_type: manualData.room_type,
-          rate: parseFloat(manualData.room_rate) || 1425
+          rate: parseFloat(manualData.room_rate) || activeRate
         },
         customBillData: {
           reg_number: manualData.reg_number,
           payment_method: manualData.payment_method,
+          billable_days: manualData.billable_days ? parseInt(manualData.billable_days, 10) : autoBillableDays,
           manual_grand_total: manualData.manual_grand_total ? parseFloat(manualData.manual_grand_total) : null
         },
         isManual: true
@@ -114,10 +122,11 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
                 Automatic bill calculation mode selected.
               </p>
               <p className="text-slate-600 dark:text-slate-400">
-                System will calculate stay duration, billable days, room rate, CGST (2.5%), and SGST (2.5%) directly from active stay records.
+                Calculated stay duration: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{autoBillableDays} Day(s)</strong> @ ₹{activeRate}/day (GST-Inclusive).
               </p>
-              <div className="pt-2 font-mono font-bold text-slate-800 dark:text-slate-200">
-                GUEST: {stay?.guest_name || 'GUEST'} • ROOM {room?.room_number || '1003'}
+              <div className="pt-2 font-mono font-bold text-slate-800 dark:text-slate-200 flex justify-between border-t border-emerald-200 dark:border-emerald-800">
+                <span>GUEST: {stay?.guest_name || 'GUEST'} • ROOM {room?.room_number || '1003'}</span>
+                <span className="text-emerald-700 dark:text-emerald-400">{autoBillableDays} DAY(S) = ₹{Math.round(activeRate * autoBillableDays)}.00</span>
               </div>
             </div>
           ) : (
