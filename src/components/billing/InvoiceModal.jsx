@@ -177,11 +177,11 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
         </div>
 
         {/* PRINTABLE INVOICE CONTENT */}
-        <div id="printable-invoice" className="p-8 md:p-12 print:p-0 bg-white text-slate-900 font-sans text-xs leading-snug">
+        <div id="printable-invoice" className="p-8 md:p-12 print:p-1 bg-white text-slate-900 font-sans text-xs leading-snug">
           
           {/* Header */}
-          <div className="text-center mb-6 print:mb-3">
-            <h1 className="text-xl md:text-2xl font-serif tracking-widest text-slate-900 font-bold uppercase mb-3 print:mb-1">
+          <div className="text-center mb-6 print:mb-4">
+            <h1 className="text-xl md:text-2xl font-serif tracking-widest text-slate-900 font-bold uppercase mb-3 print:mb-1.5">
               HOTEL GREEN TERMINAL
             </h1>
             <h2 className="text-[11px] font-bold font-sans tracking-wider uppercase text-slate-800">
@@ -190,11 +190,11 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Customer & Room Info Table */}
-          <div className="border border-slate-900 mb-6 print:mb-3 grid grid-cols-1 md:grid-cols-2">
+          <div className="border border-slate-900 mb-6 print:mb-4 grid grid-cols-1 md:grid-cols-2">
             
             {/* Left Box: Name & Address */}
-            <div className="p-3 border-b md:border-b-0 md:border-r border-slate-900 space-y-0.5">
-              <div className="font-bold text-[11px] underline uppercase mb-1.5 text-center md:text-left">
+            <div className="p-3 print:p-2.5 border-b md:border-b-0 md:border-r border-slate-900 space-y-0.5 print:space-y-1">
+              <div className="font-bold text-[11px] underline uppercase mb-1.5 print:mb-2 text-center md:text-left">
                 Name & Address
               </div>
               <div className="font-bold text-xs uppercase tracking-tight">
@@ -221,38 +221,38 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
             <div className="divide-y divide-slate-900 font-sans text-[11px]">
               {/* Header 1 */}
               <div className="grid grid-cols-4 divide-x divide-slate-900 text-center font-bold">
-                <div className="p-1">Room No</div>
-                <div className="p-1">Type</div>
-                <div className="p-1">Pax</div>
-                <div className="p-1">Reg #</div>
+                <div className="p-1 print:p-1.5">Room No</div>
+                <div className="p-1 print:p-1.5">Type</div>
+                <div className="p-1 print:p-1.5">Pax</div>
+                <div className="p-1 print:p-1.5">Reg #</div>
               </div>
               {/* Values 1 */}
               <div className="grid grid-cols-4 divide-x divide-slate-900 text-center font-mono">
-                <div className="p-1.5 font-bold">{roomNumber}</div>
-                <div className="p-1.5 uppercase">{roomType === 'AC' ? 'STD' : roomType}</div>
-                <div className="p-1.5">1</div>
-                <div className="p-1.5">{regNumber}</div>
+                <div className="p-1.5 print:p-2 font-bold">{roomNumber}</div>
+                <div className="p-1.5 print:p-2 uppercase">{roomType === 'AC' ? 'STD' : roomType}</div>
+                <div className="p-1.5 print:p-2">1</div>
+                <div className="p-1.5 print:p-2">{regNumber}</div>
               </div>
 
               {/* Header 2 */}
               <div className="grid grid-cols-4 divide-x divide-slate-900 text-center font-bold">
-                <div className="p-1">Check - In</div>
-                <div className="p-1">Check - Out</div>
-                <div className="p-1">Nationality</div>
-                <div className="p-1">Bill Date/No.</div>
+                <div className="p-1 print:p-1.5">Check - In</div>
+                <div className="p-1 print:p-1.5">Check - Out</div>
+                <div className="p-1 print:p-1.5">Nationality</div>
+                <div className="p-1 print:p-1.5">Bill Date/No.</div>
               </div>
               {/* Values 2 */}
               <div className="grid grid-cols-4 divide-x divide-slate-900 text-center font-mono text-[10px]">
-                <div className="p-1">
+                <div className="p-1 print:p-1.5">
                   <div>{checkInFormatted.dateStr}</div>
                   <div>{checkInFormatted.timeStr}</div>
                 </div>
-                <div className="p-1">
+                <div className="p-1 print:p-1.5">
                   <div>{checkOutFormatted.dateStr}</div>
                   <div>{checkOutFormatted.timeStr}</div>
                 </div>
-                <div className="p-1.5">IND</div>
-                <div className="p-1">
+                <div className="p-1.5 print:p-2">IND</div>
+                <div className="p-1 print:p-1.5">
                   <div>{billDateFormatted}</div>
                   <div className="font-bold">{billNo}</div>
                 </div>
@@ -262,59 +262,59 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Charges Breakdown Table */}
-          <table className="w-full border-collapse border border-slate-900 font-sans text-xs mb-6 print:mb-3">
+          <table className="w-full border-collapse border border-slate-900 font-sans text-xs mb-6 print:mb-5">
             <thead>
               <tr className="border-b border-slate-900 font-bold">
-                <th className="border-r border-slate-900 p-1.5 text-center">Description</th>
-                <th className="border-r border-slate-900 p-1.5 text-center w-28">Charges</th>
-                <th className="border-r border-slate-900 p-1.5 text-center w-28">Credit</th>
-                <th className="p-1.5 text-center w-28">Balance</th>
+                <th className="border-r border-slate-900 p-1.5 print:p-2.5 text-center">Description</th>
+                <th className="border-r border-slate-900 p-1.5 print:p-2.5 text-center w-28">Charges</th>
+                <th className="border-r border-slate-900 p-1.5 print:p-2.5 text-center w-28">Credit</th>
+                <th className="p-1.5 print:p-2.5 text-center w-28">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300 font-mono text-xs">
               <tr>
-                <td className="border-r border-slate-900 p-1 font-bold pl-12">
+                <td className="border-r border-slate-900 p-1 print:p-2 font-bold pl-12">
                   Room Rate @{baseRoomRatePerDay.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6">{baseCharges.toFixed(2)}</td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
-                <td className="p-1 text-right pr-6"></td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6">{baseCharges.toFixed(2)}</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6"></td>
+                <td className="p-1 print:p-2 text-right pr-6"></td>
               </tr>
               <tr>
-                <td className="border-r border-slate-900 p-1 pl-12">
+                <td className="border-r border-slate-900 p-1 print:p-2 pl-12">
                   CGST {cgstRate.toFixed(1)}% @{dailyCgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6">{cgstAmount.toFixed(2)}</td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
-                <td className="p-1 text-right pr-6"></td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6">{cgstAmount.toFixed(2)}</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6"></td>
+                <td className="p-1 print:p-2 text-right pr-6"></td>
               </tr>
               <tr>
-                <td className="border-r border-slate-900 p-1 pl-12">
+                <td className="border-r border-slate-900 p-1 print:p-2 pl-12">
                   SGST {sgstRate.toFixed(1)}% @{dailySgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6">{sgstAmount.toFixed(2)}</td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
-                <td className="p-1 text-right pr-6"></td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6">{sgstAmount.toFixed(2)}</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6"></td>
+                <td className="p-1 print:p-2 text-right pr-6"></td>
               </tr>
               <tr>
-                <td className="border-r border-slate-900 p-1 font-bold pl-12">
+                <td className="border-r border-slate-900 p-1 print:p-2 font-bold pl-12">
                   Cash Deposit
                 </td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6 font-bold">{grandTotal.toFixed(2)}</td>
-                <td className="p-1 text-right pr-6"></td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6"></td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6 font-bold">{grandTotal.toFixed(2)}</td>
+                <td className="p-1 print:p-2 text-right pr-6"></td>
               </tr>
               <tr className="font-bold border-t border-slate-900">
-                <td className="border-r border-slate-900 p-1 font-sans font-bold pl-16">Grand Total</td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6">{grandTotal.toFixed(2)}</td>
-                <td className="border-r border-slate-900 p-1 text-right pr-6">{grandTotal.toFixed(2)}</td>
-                <td className="p-1 text-right pr-6">0.00</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 font-sans font-bold pl-16">Grand Total</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6">{grandTotal.toFixed(2)}</td>
+                <td className="border-r border-slate-900 p-1 print:p-2 text-right pr-6">{grandTotal.toFixed(2)}</td>
+                <td className="p-1 print:p-2 text-right pr-6">0.00</td>
               </tr>
             </tbody>
           </table>
 
           {/* Pay Mode & Words */}
-          <div className="space-y-1 mb-6 print:mb-3 font-sans">
+          <div className="space-y-1 print:space-y-2 mb-6 print:mb-5 font-sans">
             <div className="text-xs font-bold uppercase">
               Pay Mode : <span className="font-mono">{payMode}</span>
             </div>
@@ -324,7 +324,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* Room Key & Signatures Row */}
-          <div className="grid grid-cols-2 gap-4 font-sans text-[10px] items-end mb-4 print:mb-2">
+          <div className="grid grid-cols-2 gap-4 font-sans text-[10px] items-end mb-4 print:mb-5 print:mt-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-[10px]">Please deposit your room key</span>
@@ -345,13 +345,13 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
           </div>
 
           {/* User Id & Page Row */}
-          <div className="flex justify-between items-center text-[10px] font-sans font-bold text-slate-800 mb-4 print:mb-2">
+          <div className="flex justify-between items-center text-[10px] font-sans font-bold text-slate-800 mb-4 print:mb-3">
             <div>User Id : <span className="font-mono ml-4">FOM</span></div>
             <div>Page: <br /> 1 / 1</div>
           </div>
 
           {/* Bulleted Company Details Footer */}
-          <div className="text-[10px] text-slate-800 font-sans space-y-0.5 border-t border-slate-300 pt-3">
+          <div className="text-[10px] text-slate-800 font-sans space-y-0.5 print:space-y-1 border-t border-slate-300 pt-3 print:pt-3.5">
             <div className="flex items-start gap-2">
               <span>•</span>
               <span className="font-bold">YKS HOSPITALITY VENTURES PVT LTD</span>
