@@ -715,6 +715,7 @@ export const HotelProvider = ({ children }) => {
       id: crypto.randomUUID(),
       receipt_number: receiptData.receipt_number || String(Math.floor(8000 + Math.random() * 900)),
       room_number: receiptData.room_number || '4007',
+      category: receiptData.category || 'AC',
       guest_name: receiptData.guest_name ? receiptData.guest_name.toUpperCase() : 'GUEST',
       phone: receiptData.phone || '',
       payment_method: receiptData.payment_method || 'CARD PAID',

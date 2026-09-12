@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
 import { X, UserCheck, User, Phone, Building, Hash, Calendar } from 'lucide-react';
+import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
 
 export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
   const { checkInGuest, getRoomActiveBooking } = useHotel();
@@ -149,19 +150,12 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                Check-in Timestamp
-              </label>
-              <input
-                type="datetime-local"
-                required
-                className="clay-input w-full px-2 py-2 text-xs font-semibold"
-                value={formData.check_in}
-                onChange={(e) => setFormData({ ...formData, check_in: e.target.value })}
-              />
-            </div>
+          <div className="space-y-3">
+            <QuickDateTimePicker
+              label="Check-in Timestamp"
+              value={formData.check_in}
+              onChange={(val) => setFormData({ ...formData, check_in: val })}
+            />
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">

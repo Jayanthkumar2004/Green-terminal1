@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
 import { X, CalendarCheck, UserCheck, LogOut, Receipt, Printer, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
+import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
 
 export const RoomActionModal = ({ 
   room, 
@@ -269,23 +270,11 @@ export const RoomActionModal = ({
                     onChange={(e) => setEditFormData({ ...editFormData, gst_number: e.target.value })}
                   />
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300">Check-in Timestamp</label>
-                    <button
-                      type="button"
-                      onClick={() => setEditFormData({ ...editFormData, check_in: getNowLocalStr() })}
-                      className="text-[9px] font-bold text-sky-600 dark:text-sky-400 hover:underline uppercase"
-                    >
-                      Set Now
-                    </button>
-                  </div>
-                  <input
-                    type="datetime-local"
-                    required
-                    className="clay-input w-full px-2 py-1 text-xs font-semibold"
+                <div className="col-span-2">
+                  <QuickDateTimePicker
+                    label="Check-in Timestamp"
                     value={editFormData.check_in}
-                    onChange={(e) => setEditFormData({ ...editFormData, check_in: e.target.value })}
+                    onChange={(val) => setEditFormData({ ...editFormData, check_in: val })}
                   />
                 </div>
               </div>

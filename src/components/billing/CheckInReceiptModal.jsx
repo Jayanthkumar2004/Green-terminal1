@@ -6,8 +6,8 @@ export const CheckInReceiptModal = ({ stay, room, onClose }) => {
   if (!stay && !room) return null;
 
   const roomNumber = room?.room_number || stay?.room_number || '4007';
-  const rawRoomType = (room?.room_type || stay?.room_type || 'AC').toUpperCase();
-  const roomCategory = rawRoomType.includes('NON') || rawRoomType.includes('NON-AC') ? 'NON AC' : 'AC';
+  const rawRoomType = (room?.room_type || stay?.room_type || stay?.category || 'AC').toUpperCase();
+  const roomCategory = stay?.category ? stay.category.toUpperCase() : (rawRoomType.includes('NON') || rawRoomType.includes('NON-AC') ? 'NON AC' : 'AC');
   
   const roomRate = stay?.room_rate || room?.rate || 1425;
   const guestName = stay?.guest_name || 'GUEST NAME';
