@@ -496,8 +496,21 @@ export const HotelProvider = ({ children }) => {
   // EDIT ACTIVE STAY DETAILS
   const editActiveStay = async (stayId, updatedFields) => {
     if (isSupabaseConfigured && supabase && isUUID(stayId)) {
-      const { error } = await supabase.from('stays').update(updatedFields).eq('id', stayId);
-      if (error) console.error('Error editing stay:', error);
+      try {
+        const dbPayload = { ...updatedFields };
+        const { error } = await supabase.from('stays').update(dbPayload).eq('id', stayId);
+        if (error) {
+          console.warn('Supabase stays update note:', error.message);
+          // Fallback if category or receipt_number column is not in Supabase stays table schema
+          if (error.code === 'PGRST204') {
+            delete dbPayload.category;
+            delete dbPayload.receipt_number;
+            await supabase.from('stays').update(dbPayload).eq('id', stayId);
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase stay edit error:', err);
+      }
     }
 
     setStays(prev => prev.map(s => s.id === stayId ? { ...s, ...updatedFields } : s));
