@@ -144,13 +144,19 @@ html.dark body, body.dark {
   }
 }
 
-/* Print Styles for Invoice - Single A4 Page, Top-Left Origin (0,0), No Gap, No Split */
+/* Print Styles for Invoice - React Portal Clean Single A4 Page Print */
 @media print {
   @page {
     size: A4 portrait;
     margin: 6mm 8mm;
   }
 
+  /* 1. Hide the main app in #root during print */
+  #root {
+    display: none !important;
+  }
+
+  /* 2. Reset html & body */
   html, 
   body {
     background: #ffffff !important;
@@ -161,40 +167,25 @@ html.dark body, body.dark {
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
-    max-height: none !important;
     overflow: visible !important;
   }
 
-  /* Reset all ancestor elements of #printable-invoice to static layout at origin (0,0) */
-  html,
-  body,
-  #root,
-  div:has(#printable-invoice) {
-    position: static !important;
+  /* 3. Portaled container #print-root */
+  #print-root {
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    transform: none !important;
-    filter: none !important;
-    backdrop-filter: none !important;
     width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    background: transparent !important;
+    position: static !important;
   }
 
-  /* Completely remove all elements that are NOT part of the printable invoice or its ancestor chain */
-  *:not(:has(#printable-invoice)):not(#printable-invoice):not(#printable-invoice *) {
+  /* 4. Hide non-printable elements like control bar */
+  .no-print,
+  .no-print * {
     display: none !important;
-    height: 0 !important;
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
   }
 
-  /* Ensure invoice and its children are visible and positioned at origin */
+  /* 5. Ensure printable invoice starts at top (0,0) of Page 1 */
   #printable-invoice, 
   #printable-invoice * {
     visibility: visible !important;

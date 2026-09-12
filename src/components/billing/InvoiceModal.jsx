@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useHotel } from '../../context/HotelContext';
 import { X, Printer, Key } from 'lucide-react';
 import { numberToWords } from '../../lib/numberToWords';
@@ -124,7 +125,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
     window.print();
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:static print:block print:w-full print:h-auto print:min-h-0 print:p-0 print:m-0 print:bg-transparent print:overflow-visible">
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-slate-300 overflow-hidden my-auto print:max-w-none print:w-full print:rounded-none print:shadow-none print:border-none print:m-0 print:p-0 print:overflow-visible print:bg-transparent print:block print:h-auto print:static">
         
@@ -373,4 +374,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
       </div>
     </div>
   );
+
+  const printTarget = document.getElementById('print-root') || document.body;
+  return ReactDOM.createPortal(modalContent, printTarget);
 };
