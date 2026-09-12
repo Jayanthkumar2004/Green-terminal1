@@ -5,7 +5,7 @@ import { CheckInReceiptModal } from './CheckInReceiptModal';
 import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
 
 export const PaymentReceiptsSection = () => {
-  const { paymentReceipts, createPaymentReceipt, updatePaymentReceipt, deletePaymentReceipt } = useHotel();
+  const { paymentReceipts, rooms, createPaymentReceipt, updatePaymentReceipt, deletePaymentReceipt } = useHotel();
   
   const [searchTerm, setSearchTerm] = useState('');
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -26,6 +26,12 @@ export const PaymentReceiptsSection = () => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
+  // Helper to fetch fixed room tariff
+  const getRoomTariff = (roomNum) => {
+    if (!rooms) return null;
+    return rooms.find(r => String(r.room_number).trim() === String(roomNum).trim());
+  };
+
   // Form State for Add / Edit
   const [formData, setFormData] = useState({
     receipt_number: '',
@@ -38,6 +44,16 @@ export const PaymentReceiptsSection = () => {
     created_at: getNowLocalStr(),
     notes: ''
   });
+
+  const handleRoomNumberChange = (numStr) => {
+    const foundRoom = getRoomTariff(numStr);
+    setFormData(prev => ({
+      ...prev,
+      room_number: numStr,
+      amount: foundRoom?.rate ? String(foundRoom.rate) : prev.amount,
+      category: foundRoom?.room_type ? (foundRoom.room_type.includes('NON') ? 'NON AC' : 'AC') : prev.category
+    }));
+  };
 
   const isWithinDateRange = (itemDateStr) => {
     if (!itemDateStr) return true;
@@ -58,14 +74,16 @@ export const PaymentReceiptsSection = () => {
   const totalCollected = filteredReceipts.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
 
   const handleOpenAdd = () => {
+    const defaultRoom = '4007';
+    const foundRoom = getRoomTariff(defaultRoom);
     setFormData({
       receipt_number: String(Math.floor(8000 + Math.random() * 900)),
-      room_number: '4007',
-      category: 'AC',
+      room_number: defaultRoom,
+      category: foundRoom?.room_type ? (foundRoom.room_type.includes('NON') ? 'NON AC' : 'AC') : 'AC',
       guest_name: '',
       phone: '',
       payment_method: 'CARD PAID',
-      amount: '',
+      amount: foundRoom?.rate ? String(foundRoom.rate) : '1425',
       created_at: getNowLocalStr(),
       notes: ''
     });
@@ -458,7 +476,7 @@ export const PaymentReceiptsSection = () => {
                     required
                     className="clay-input w-full px-2.5 py-1.5 text-xs font-mono font-black"
                     value={formData.room_number}
-                    onChange={(e) => setFormData({ ...formData, room_number: e.target.value })}
+                    onChange={(e) => handleRoomNumberChange(e.target.value)}
                   />
                 </div>
                 <div>

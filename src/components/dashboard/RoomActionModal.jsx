@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
 import { X, CalendarCheck, UserCheck, LogOut, Receipt, Printer, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
 import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
@@ -37,7 +37,7 @@ export const RoomActionModal = ({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
-  // Edit Active Stay Form State - check_in defaults to current local time or stay time
+  // Edit Active Stay Form State - room_rate fetched from fixed room.rate
   const [isEditingStay, setIsEditingStay] = useState(false);
   const [editFormData, setEditFormData] = useState({
     receipt_number: activeStay?.receipt_number || String(Math.floor(8000 + Math.random() * 900)),
@@ -49,6 +49,21 @@ export const RoomActionModal = ({
     room_rate: activeStay?.room_rate || room.rate || 1425,
     category: activeStay?.category || room.room_type || 'AC'
   });
+
+  useEffect(() => {
+    if (room) {
+      setEditFormData({
+        receipt_number: activeStay?.receipt_number || String(Math.floor(8000 + Math.random() * 900)),
+        guest_name: activeStay?.guest_name || '',
+        phone: activeStay?.phone || '',
+        company_name: activeStay?.company_name || '',
+        gst_number: activeStay?.gst_number || '',
+        check_in: activeStay?.check_in ? getLocalISOFromDate(new Date(activeStay.check_in)) : getNowLocalStr(),
+        room_rate: activeStay?.room_rate || room.rate || 1425,
+        category: activeStay?.category || room.room_type || 'AC'
+      });
+    }
+  }, [room?.id, activeStay?.id]);
 
   // Live timer calculation
   let durationText = 'N/A';

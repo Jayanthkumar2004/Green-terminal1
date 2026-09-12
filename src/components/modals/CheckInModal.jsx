@@ -23,6 +23,19 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
     rate: room?.rate || 1425
   });
 
+  useEffect(() => {
+    if (room) {
+      setFormData(prev => ({
+        ...prev,
+        rate: room.rate || 1425,
+        guest_name: activeBooking?.guest_name || prev.guest_name,
+        phone: activeBooking?.phone || prev.phone,
+        company_name: activeBooking?.company_name || prev.company_name,
+        gst_number: activeBooking?.gst_number || prev.gst_number
+      }));
+    }
+  }, [room?.id]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
