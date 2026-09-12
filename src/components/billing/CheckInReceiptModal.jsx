@@ -28,7 +28,7 @@ export const CheckInReceiptModal = ({ stay, room, onClose }) => {
   };
 
   const checkInFormatted = formatDateTime(checkInDate);
-  const receiptNo = String(Math.floor(8000 + Math.random() * 900));
+  const receiptNo = stay?.receipt_number || stay?.receipt_no || room?.receipt_number || String(Math.floor(8000 + Math.random() * 900));
 
   const handlePrint = () => {
     window.print();

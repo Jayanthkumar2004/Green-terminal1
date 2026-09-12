@@ -31,15 +31,23 @@ export const RoomActionModal = ({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
-  // Edit Active Stay Form State - check_in defaults to current local time by default when editing
+  const getLocalISOFromDate = (d) => {
+    if (!d || isNaN(d.getTime())) return getNowLocalStr();
+    const pad = (num) => String(num).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  // Edit Active Stay Form State - check_in defaults to current local time or stay time
   const [isEditingStay, setIsEditingStay] = useState(false);
   const [editFormData, setEditFormData] = useState({
+    receipt_number: activeStay?.receipt_number || String(Math.floor(8000 + Math.random() * 900)),
     guest_name: activeStay?.guest_name || '',
     phone: activeStay?.phone || '',
     company_name: activeStay?.company_name || '',
     gst_number: activeStay?.gst_number || '',
-    check_in: getNowLocalStr(),
-    room_rate: activeStay?.room_rate || room.rate
+    check_in: activeStay?.check_in ? getLocalISOFromDate(new Date(activeStay.check_in)) : getNowLocalStr(),
+    room_rate: activeStay?.room_rate || room.rate || 1425,
+    category: activeStay?.category || room.room_type || 'AC'
   });
 
   // Live timer calculation
@@ -77,19 +85,32 @@ export const RoomActionModal = ({
     onClose();
   };
 
-  const handleSaveStayEdit = async (e) => {
-    e.preventDefault();
+  const handleSaveStayEdit = async (e, shouldPrint = false) => {
+    if (e) e.preventDefault();
     if (!activeStay) return;
     try {
-      await editActiveStay(activeStay.id, {
+      const updatedFields = {
         guest_name: editFormData.guest_name.toUpperCase(),
         phone: editFormData.phone,
         company_name: editFormData.company_name,
         gst_number: editFormData.gst_number,
         check_in: new Date(editFormData.check_in).toISOString(),
-        room_rate: parseFloat(editFormData.room_rate) || room.rate
-      });
+        room_rate: parseFloat(editFormData.room_rate) || room.rate,
+        category: editFormData.category || room.room_type || 'AC',
+        receipt_number: editFormData.receipt_number
+      };
+
+      await editActiveStay(activeStay.id, updatedFields);
       setIsEditingStay(false);
+
+      if (shouldPrint && onPrintReceipt) {
+        onClose();
+        onPrintReceipt({
+          ...room,
+          room_type: updatedFields.category,
+          rate: updatedFields.room_rate
+        });
+      }
     } catch (err) {
       console.error('Failed to edit stay:', err);
     }
@@ -119,7 +140,7 @@ export const RoomActionModal = ({
         </div>
 
         {/* Modal Body / Status Info */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <span className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400">Current Room Status</span>
             {formatStatusBadge()}
@@ -168,7 +189,7 @@ export const RoomActionModal = ({
           {activeStay && !isEditingStay ? (
             <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 relative">
               
-              {/* EDIT STAY BUTTON IN ROOM ACTION MODAL */}
+              {/* EDIT STAY / RECEIPT BUTTON IN ROOM ACTION MODAL */}
               <button
                 onClick={() => setIsEditingStay(true)}
                 className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all"
@@ -222,14 +243,51 @@ export const RoomActionModal = ({
               </div>
             </div>
           ) : activeStay && isEditingStay ? (
-            /* EDIT ACTIVE STAY FORM */
-            <form onSubmit={handleSaveStayEdit} className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border-2 border-emerald-500 space-y-3">
-              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase border-b border-slate-200 dark:border-slate-700 pb-1">
-                EDIT GUEST STAY DETAILS
+            /* EDIT ACTIVE STAY & RECEIPT DETAILS FORM */
+            <form onSubmit={(e) => handleSaveStayEdit(e, false)} className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border-2 border-emerald-500 space-y-3">
+              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase border-b border-slate-200 dark:border-slate-700 pb-1 flex items-center justify-between">
+                <span>EDIT GUEST & RECEIPT DETAILS</span>
+                <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400">ROOM {room.room_number}</span>
               </h4>
               
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Receipt #</label>
+                  <input
+                    type="text"
+                    required
+                    className="clay-input w-full px-2.5 py-1.5 text-xs font-mono font-bold"
+                    value={editFormData.receipt_number}
+                    onChange={(e) => setEditFormData({ ...editFormData, receipt_number: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                  <select
+                    className="clay-input w-full px-2.5 py-1.5 text-xs font-bold uppercase"
+                    value={editFormData.category}
+                    onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                  >
+                    <option value="AC">AC ROOM</option>
+                    <option value="NON AC">NON AC ROOM</option>
+                    <option value="DELUXE AC">DELUXE AC</option>
+                    <option value="SUITE">SUITE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Daily Rate (₹)</label>
+                  <input
+                    type="number"
+                    required
+                    className="clay-input w-full px-2.5 py-1.5 text-xs font-mono font-black"
+                    value={editFormData.room_rate}
+                    onChange={(e) => setEditFormData({ ...editFormData, room_rate: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Guest Name</label>
+                <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Guest Name *</label>
                 <input
                   type="text"
                   required
@@ -281,6 +339,13 @@ export const RoomActionModal = ({
 
               <div className="flex gap-2 pt-2">
                 <button
+                  type="button"
+                  onClick={() => setIsEditingStay(false)}
+                  className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-lg text-xs uppercase"
+                >
+                  Cancel
+                </button>
+                <button
                   type="submit"
                   className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-1 shadow"
                 >
@@ -289,10 +354,11 @@ export const RoomActionModal = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsEditingStay(false)}
-                  className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-lg text-xs uppercase"
+                  onClick={(e) => handleSaveStayEdit(e, true)}
+                  className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-lg text-xs uppercase flex items-center justify-center gap-1 shadow"
                 >
-                  Cancel
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Save & Print</span>
                 </button>
               </div>
             </form>
@@ -362,7 +428,7 @@ export const RoomActionModal = ({
             <button
               disabled={!activeStay}
               onClick={() => { onClose(); onPrintReceipt(room); }}
-              className={`col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-black transition-all shadow-sm ${
+              className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-black transition-all shadow-sm ${
                 activeStay 
                   ? 'bg-sky-600 hover:bg-sky-700 text-white shadow-md' 
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
@@ -370,6 +436,20 @@ export const RoomActionModal = ({
             >
               <Printer className="w-4 h-4" />
               <span>PRINT CHECK-IN RECEIPT (SLIP)</span>
+            </button>
+
+            {/* BUTTON EDIT & PRINT RECEIPT */}
+            <button
+              disabled={!activeStay}
+              onClick={() => setIsEditingStay(true)}
+              className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-black transition-all shadow-sm ${
+                activeStay 
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <Edit3 className="w-4 h-4" />
+              <span>EDIT & PRINT RECEIPT</span>
             </button>
 
             {/* BUTTON YET TO CLEAN */}
@@ -401,7 +481,6 @@ export const RoomActionModal = ({
             )}
           </div>
         </div>
-
       </div>
     </div>
   );
