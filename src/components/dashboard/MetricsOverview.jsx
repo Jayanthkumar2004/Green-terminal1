@@ -8,19 +8,24 @@ export const MetricsOverview = () => {
   const totalRooms = rooms.length;
 
   const checkedInCount = stays.filter(s => s.status === 'CHECKED_IN').length;
-  const bookedCount = bookings.filter(b => b.status === 'ACTIVE').length;
   const yetToCleanCount = rooms.filter(r => 
     r.status === 'OUT_FOR_CLEANING' || r.status === 'YET_TO_CLEAN'
   ).length;
   const maintenanceCount = rooms.filter(r => r.status === 'MAINTENANCE').length;
 
+  const bookedCount = rooms.filter(r => {
+    const isStay = stays.some(s => (s.room_id === r.id || s.room_number === r.room_number) && s.status === 'CHECKED_IN');
+    const isBooked = bookings.some(b => (b.room_id === r.id || b.room_number === r.room_number) && b.status === 'ACTIVE');
+    return r.status !== 'MAINTENANCE' && !isStay && (r.status === 'BOOKED' || isBooked);
+  }).length;
+
   // Available rooms are strictly those without active check-in, booking, cleaning, or maintenance requirement
   const availableCount = rooms.filter(r => {
-    const isStay = stays.some(s => s.room_id === r.id && s.status === 'CHECKED_IN');
-    const isBooked = bookings.some(b => b.room_id === r.id && b.status === 'ACTIVE');
+    const isStay = stays.some(s => (s.room_id === r.id || s.room_number === r.room_number) && s.status === 'CHECKED_IN');
+    const isBooked = bookings.some(b => (b.room_id === r.id || b.room_number === r.room_number) && b.status === 'ACTIVE');
     const isCleaning = r.status === 'OUT_FOR_CLEANING' || r.status === 'YET_TO_CLEAN';
     const isMaintenance = r.status === 'MAINTENANCE';
-    return !isStay && !isBooked && !isCleaning && !isMaintenance;
+    return !isStay && !isBooked && !isCleaning && !isMaintenance && r.status !== 'BOOKED';
   }).length;
 
   const stats = [

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { X, CalendarCheck, UserCheck, LogOut, Receipt, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
+import { X, CalendarCheck, UserCheck, LogOut, Receipt, Printer, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
 
 export const RoomActionModal = ({ 
   room, 

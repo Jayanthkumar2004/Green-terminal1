@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { Receipt, Printer, Search, Trash2, Download, Calendar, ShieldAlert } from 'lucide-react';
+import { Receipt, Printer, Search, Trash2, Download, Calendar, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { InvoiceModal } from './InvoiceModal';
+import { PaymentReceiptsSection } from './PaymentReceiptsSection';
 
 export const BillsList = () => {
   const { bills, deleteBill, clearBillsHistory } = useHotel();
+  const [activeSubTab, setActiveSubTab] = useState('invoices'); // 'invoices' | 'receipts'
   const [selectedBill, setSelectedBill] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -55,18 +57,6 @@ export const BillsList = () => {
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
       <head>
         <meta charset="utf-8" />
-        <!--[if gte mso 9]>
-        <xml>
-          <x:ExcelWorkbook>
-            <x:ExcelWorksheets>
-              <x:ExcelWorksheet>
-                <x:Name>Green Terminal Bills</x:Name>
-                <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-              </x:ExcelWorksheet>
-            </x:ExcelWorksheets>
-          </x:ExcelWorkbook>
-        </xml>
-        <![endif]-->
         <style>
           body { font-family: Arial, sans-serif; font-size: 12px; }
           table { border-collapse: collapse; width: 100%; }
@@ -127,17 +117,49 @@ export const BillsList = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header & Action Controls */}
-      <div className="clay-card p-4 sm:p-6 border border-slate-300 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <Receipt className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            GENERATED BILLS REGISTRY
-          </h2>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-            View, filter, delete, re-print, and export historical Green Terminal guest invoices.
-          </p>
-        </div>
+      
+      {/* Navigation Sub-Tabs Toggle */}
+      <div className="flex items-center gap-2 bg-slate-200/80 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700 w-fit no-print">
+        <button
+          onClick={() => setActiveSubTab('invoices')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all ${
+            activeSubTab === 'invoices'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
+          }`}
+        >
+          <Receipt className="w-4 h-4" />
+          <span>GENERATED INVOICES</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('receipts')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all ${
+            activeSubTab === 'receipts'
+              ? 'bg-sky-600 text-white shadow-md'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4" />
+          <span>PAYMENT RECEIPTS (CRUD)</span>
+        </button>
+      </div>
+
+      {activeSubTab === 'receipts' ? (
+        <PaymentReceiptsSection />
+      ) : (
+        <>
+          {/* Header & Action Controls */}
+          <div className="clay-card p-4 sm:p-6 border border-slate-300 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                <Receipt className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                GENERATED BILLS REGISTRY
+              </h2>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                View, filter, delete, re-print, and export historical Green Terminal guest invoices.
+              </p>
+            </div>
 
         {/* Date Filter & Export & Clear History Buttons */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -317,6 +339,8 @@ export const BillsList = () => {
           initialBill={selectedBill}
           onClose={() => setSelectedBill(null)}
         />
+      )}
+        </>
       )}
     </div>
   );

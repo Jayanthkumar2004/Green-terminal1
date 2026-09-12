@@ -59,6 +59,34 @@ export const HotelProvider = ({ children }) => {
     return localBills ? JSON.parse(localBills) : INITIAL_BILLS_SEED;
   });
 
+  const [paymentReceipts, setPaymentReceipts] = useState(() => {
+    const localReceipts = localStorage.getItem('gt_payment_receipts');
+    return localReceipts ? JSON.parse(localReceipts) : [
+      {
+        id: 'receipt-101',
+        receipt_number: '8001',
+        room_number: '4007',
+        guest_name: 'ROHITH',
+        phone: '9100920936',
+        payment_method: 'CARD PAID',
+        amount: 3000,
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: 'Advance deposit receipt'
+      },
+      {
+        id: 'receipt-102',
+        receipt_number: '8002',
+        room_number: '1001',
+        guest_name: 'SANDEEP',
+        phone: '9876543210',
+        payment_method: 'UPI PAID',
+        amount: 1425,
+        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: 'Room booking check-in receipt'
+      }
+    ];
+  });
+
   // Live timer tick every 1s for real-time live clock & duration on room cards!
   const [now, setNow] = useState(new Date());
 
@@ -83,6 +111,10 @@ export const HotelProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('gt_bills', JSON.stringify(bills));
   }, [bills]);
+
+  useEffect(() => {
+    localStorage.setItem('gt_payment_receipts', JSON.stringify(paymentReceipts));
+  }, [paymentReceipts]);
 
   useEffect(() => {
     if (user) {
@@ -677,6 +709,68 @@ export const HotelProvider = ({ children }) => {
     ));
   };
 
+  // PAYMENT RECEIPTS CRUD ACTIONS
+  const createPaymentReceipt = async (receiptData) => {
+    const newReceipt = {
+      id: crypto.randomUUID(),
+      receipt_number: receiptData.receipt_number || String(Math.floor(8000 + Math.random() * 900)),
+      room_number: receiptData.room_number || '4007',
+      guest_name: receiptData.guest_name ? receiptData.guest_name.toUpperCase() : 'GUEST',
+      phone: receiptData.phone || '',
+      payment_method: receiptData.payment_method || 'CARD PAID',
+      amount: parseFloat(receiptData.amount) || 0,
+      notes: receiptData.notes || 'Payment receipt',
+      created_at: receiptData.created_at || new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('payment_receipts').insert([newReceipt]).select();
+        if (error) console.warn('Supabase payment_receipts insert note:', error.message);
+        if (data && data[0]) newReceipt.id = data[0].id;
+      } catch (err) {
+        console.warn('Supabase payment receipt create error:', err);
+      }
+    }
+
+    setPaymentReceipts(prev => [newReceipt, ...prev]);
+    return newReceipt;
+  };
+
+  const updatePaymentReceipt = async (id, updatedFields) => {
+    if (isSupabaseConfigured && supabase && isUUID(id)) {
+      try {
+        const { error } = await supabase.from('payment_receipts').update(updatedFields).eq('id', id);
+        if (error) console.warn('Supabase update payment receipt note:', error.message);
+      } catch (err) {
+        console.warn('Supabase update payment receipt error:', err);
+      }
+    }
+    setPaymentReceipts(prev => prev.map(r => r.id === id ? { ...r, ...updatedFields } : r));
+  };
+
+  const deletePaymentReceipt = async (id) => {
+    if (isSupabaseConfigured && supabase && isUUID(id)) {
+      try {
+        await supabase.from('payment_receipts').delete().eq('id', id);
+      } catch (err) {
+        console.warn('Supabase delete payment receipt error:', err);
+      }
+    }
+    setPaymentReceipts(prev => prev.filter(r => r.id !== id));
+  };
+
+  const clearPaymentReceiptsHistory = async () => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('payment_receipts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      } catch (err) {
+        console.warn('Supabase clear payment receipts error:', err);
+      }
+    }
+    setPaymentReceipts([]);
+  };
+
   return (
     <HotelContext.Provider value={{
       theme,
@@ -697,12 +791,17 @@ export const HotelProvider = ({ children }) => {
       stays,
       bookings,
       bills,
+      paymentReceipts,
       createBooking,
       checkInGuest,
       editActiveStay,
       continueStayCycle,
       checkOutGuest,
       generateBill,
+      createPaymentReceipt,
+      updatePaymentReceipt,
+      deletePaymentReceipt,
+      clearPaymentReceiptsHistory,
       deleteStay,
       deleteBooking,
       deleteBill,
