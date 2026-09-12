@@ -5,7 +5,9 @@ import { Clock, LogOut, CheckCircle, AlertTriangle, ChevronRight, User } from 'l
 export const ReadyToCheckoutSection = ({ onOpenCheckOut }) => {
   const { rooms, stays, now, continueStayCycle } = useHotel();
 
-  // Find all active stays approaching or past the 24h cycle checkout threshold (N*24 - 4 hours)
+  // Find all active stays that have reached or passed a 24h cycle threshold (20h+, 44h+, 68h+...)
+  // and have NOT been dismissed for that cycle. Rooms stay inside this section continuously until
+  // either "CONTINUE STAY" or "CHECKOUT & BILL" is clicked.
   const readyStays = stays.filter(s => {
     if (s.status !== 'CHECKED_IN' || !s.check_in) return false;
 
@@ -13,15 +15,13 @@ export const ReadyToCheckoutSection = ({ onOpenCheckOut }) => {
     const diffMs = Math.max(0, now.getTime() - checkInMs);
     const durationHours = diffMs / (1000 * 60 * 60);
 
-    // Current 24-hour cycle (Cycle 1: 1-24h, Cycle 2: 25-48h, Cycle 3: 49-72h...)
-    const currentCycle = Math.max(1, Math.ceil(durationHours / 24));
-    const thresholdHours = (currentCycle * 24) - 4; // e.g. 20h, 44h, 68h...
-
+    // Highest 24-hour cycle threshold reached (Threshold 1: >=20h, Threshold 2: >=44h, Threshold 3: >=68h...)
+    const highestReachedCycle = Math.floor((durationHours + 4) / 24);
     const dismissedCycle = s.dismissed_checkout_cycle || 0;
 
-    // Room is ready/about to checkout if duration >= threshold (e.g. >= 20h for 1st day, >= 44h for 2nd day)
-    // AND has not been dismissed for the current cycle
-    return durationHours >= thresholdHours && dismissedCycle < currentCycle;
+    // Room is ready to checkout if it reached at least Threshold 1 (>=20h)
+    // AND has NOT been dismissed for the highest reached cycle
+    return highestReachedCycle >= 1 && highestReachedCycle > dismissedCycle;
   });
 
   if (readyStays.length === 0) return null;
@@ -57,7 +57,7 @@ export const ReadyToCheckoutSection = ({ onOpenCheckOut }) => {
           const diffMs = Math.max(0, now.getTime() - checkInMs);
           const durationHours = diffMs / (1000 * 60 * 60);
 
-          const currentCycle = Math.max(1, Math.ceil(durationHours / 24));
+          const highestReachedCycle = Math.floor((durationHours + 4) / 24);
           const hoursInt = Math.floor(durationHours);
           const minsInt = Math.floor((durationHours - hoursInt) * 60);
           const durationStr = `${hoursInt}h ${minsInt}m`;
@@ -84,7 +84,7 @@ export const ReadyToCheckoutSection = ({ onOpenCheckOut }) => {
                 </div>
 
                 <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-200 rounded border border-amber-300 dark:border-amber-700">
-                  Day {currentCycle} Cycle
+                  Day {highestReachedCycle} Cycle
                 </span>
               </div>
 
@@ -97,12 +97,12 @@ export const ReadyToCheckoutSection = ({ onOpenCheckOut }) => {
                 </span>
               </div>
 
-              {/* Action Buttons: 1. Checkout & Bill | 2. Continue Stay */}
+              {/* Action Buttons: 1. Continue Stay | 2. Checkout & Bill */}
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
-                  onClick={() => continueStayCycle(stay.id, currentCycle)}
+                  onClick={() => continueStayCycle(stay.id, highestReachedCycle)}
                   className="py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-[10px] uppercase shadow transition-all flex items-center justify-center gap-1"
-                  title="Guest wants to continue stay for another day. Removes from this alert list for current cycle."
+                  title="Guest wants to continue stay for another day. Removes from this section until next 24h threshold."
                 >
                   <CheckCircle className="w-3.5 h-3.5" />
                   <span>CONTINUE STAY</span>
