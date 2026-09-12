@@ -452,12 +452,13 @@ export const HotelProvider = ({ children }) => {
 
       if (isUUID(checkInData.room_id)) {
         await supabase.from('rooms').update({ status: 'CHECKED_IN' }).eq('id', checkInData.room_id);
+        await supabase.from('bookings').update({ status: 'COMPLETED' }).eq('room_id', checkInData.room_id).eq('status', 'ACTIVE');
       }
     }
 
-    setBookings(prev => prev.map(b => b.room_id === checkInData.room_id ? { ...b, status: 'COMPLETED' } : b));
+    setBookings(prev => prev.map(b => (b.room_id === checkInData.room_id || b.room_number === checkInData.room_number) ? { ...b, status: 'COMPLETED' } : b));
     setStays(prev => [newStay, ...prev.filter(s => s.room_id !== checkInData.room_id || s.status !== 'CHECKED_IN')]);
-    setRooms(prev => prev.map(r => r.id === checkInData.room_id ? { ...r, status: 'CHECKED_IN' } : r));
+    setRooms(prev => prev.map(r => (r.id === checkInData.room_id || r.room_number === checkInData.room_number) ? { ...r, status: 'CHECKED_IN' } : r));
   };
 
   // EDIT ACTIVE STAY DETAILS

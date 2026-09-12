@@ -8,7 +8,8 @@ export const RoomActionModal = ({
   onOpenBooking, 
   onOpenCheckIn, 
   onOpenCheckOut, 
-  onGenerateBill 
+  onGenerateBill,
+  onPrintReceipt
 }) => {
   const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, markRoomCleaning, setRoomMaintenance, editActiveStay, now } = useHotel();
 
@@ -22,14 +23,21 @@ export const RoomActionModal = ({
   const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
 
-  // Edit Active Stay Form State
+  // Helper for local datetime string
+  const getNowLocalStr = () => {
+    const d = new Date();
+    const pad = (num) => String(num).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  // Edit Active Stay Form State - check_in defaults to current local time by default when editing
   const [isEditingStay, setIsEditingStay] = useState(false);
   const [editFormData, setEditFormData] = useState({
     guest_name: activeStay?.guest_name || '',
     phone: activeStay?.phone || '',
     company_name: activeStay?.company_name || '',
     gst_number: activeStay?.gst_number || '',
-    check_in: activeStay?.check_in ? new Date(activeStay.check_in).toISOString().slice(0, 16) : '',
+    check_in: getNowLocalStr(),
     room_rate: activeStay?.room_rate || room.rate
   });
 
@@ -262,7 +270,16 @@ export const RoomActionModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">Check-in Timestamp</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300">Check-in Timestamp</label>
+                    <button
+                      type="button"
+                      onClick={() => setEditFormData({ ...editFormData, check_in: getNowLocalStr() })}
+                      className="text-[9px] font-bold text-sky-600 dark:text-sky-400 hover:underline uppercase"
+                    >
+                      Set Now
+                    </button>
+                  </div>
                   <input
                     type="datetime-local"
                     required
@@ -350,6 +367,20 @@ export const RoomActionModal = ({
             >
               <Receipt className="w-4 h-4" />
               <span>GENERATE BILL</span>
+            </button>
+
+            {/* BUTTON PRINT CHECK-IN RECEIPT */}
+            <button
+              disabled={!activeStay}
+              onClick={() => { onClose(); onPrintReceipt(room); }}
+              className={`col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-black transition-all shadow-sm ${
+                activeStay 
+                  ? 'bg-sky-600 hover:bg-sky-700 text-white shadow-md' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <Printer className="w-4 h-4" />
+              <span>PRINT CHECK-IN RECEIPT (SLIP)</span>
             </button>
 
             {/* BUTTON YET TO CLEAN */}

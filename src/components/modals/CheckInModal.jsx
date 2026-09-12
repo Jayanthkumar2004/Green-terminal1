@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
 import { X, UserCheck, User, Phone, Building, Hash, Calendar } from 'lucide-react';
 
-export const CheckInModal = ({ room, onClose }) => {
+export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
   const { checkInGuest, getRoomActiveBooking } = useHotel();
   const activeBooking = getRoomActiveBooking(room?.id);
 
@@ -39,16 +39,21 @@ export const CheckInModal = ({ room, onClose }) => {
     try {
       const selectedCheckInDate = new Date(formData.check_in);
 
-      await checkInGuest({
+      const checkInData = {
         room_id: room.id,
-        guest_name: formData.guest_name,
+        guest_name: formData.guest_name.toUpperCase(),
         phone: formData.phone,
         company_name: formData.company_name,
         gst_number: formData.gst_number,
         check_in: selectedCheckInDate.toISOString(),
-        rate: parseFloat(formData.rate) || room.rate
-      });
+        room_rate: parseFloat(formData.rate) || room.rate
+      };
+
+      await checkInGuest(checkInData);
       onClose();
+      if (onPrintReceipt) {
+        onPrintReceipt(checkInData);
+      }
     } catch (err) {
       setError(err.message || 'Check-in failed');
     } finally {

@@ -9,6 +9,7 @@ import { BookingModal } from './components/modals/BookingModal';
 import { CheckInModal } from './components/modals/CheckInModal';
 import { CheckOutModal } from './components/modals/CheckOutModal';
 import { InvoiceModal } from './components/billing/InvoiceModal';
+import { CheckInReceiptModal } from './components/billing/CheckInReceiptModal';
 import { RoomAdminModal } from './components/admin/RoomAdminModal';
 import { BillsList } from './components/billing/BillsList';
 import { HistoryView } from './components/history/HistoryView';
@@ -25,9 +26,10 @@ export function App() {
   const [checkInRoom, setCheckInRoom] = useState(null);
   const [checkOutRoom, setCheckOutRoom] = useState(null);
   
-  // Invoice Modal state
+  // Invoice & Receipt Modal state
   const [invoiceData, setInvoiceData] = useState(null); // { stay, room, customBillData }
   const [billChoiceData, setBillChoiceData] = useState(null); // { stay, room }
+  const [receiptData, setReceiptData] = useState(null); // { stay, room }
 
   if (!user) {
     return <AuthModal />;
@@ -41,6 +43,12 @@ export function App() {
     const activeStay = getRoomActiveStay(room.id);
     if (!activeStay) return;
     setBillChoiceData({ stay: activeStay, room });
+  };
+
+  const handlePrintReceiptFromAction = (room) => {
+    const activeStay = getRoomActiveStay(room.id);
+    if (!activeStay) return;
+    setReceiptData({ stay: activeStay, room });
   };
 
   const handleAfterCheckoutGenerateBill = (checkoutResult) => {
@@ -113,6 +121,7 @@ export function App() {
             onOpenCheckIn={(room) => setCheckInRoom(room)}
             onOpenCheckOut={(room) => setCheckOutRoom(room)}
             onGenerateBill={(room) => handleGenerateBillFromAction(room)}
+            onPrintReceipt={(room) => handlePrintReceiptFromAction(room)}
           />
         )}
 
@@ -129,6 +138,7 @@ export function App() {
           <CheckInModal
             room={checkInRoom}
             onClose={() => setCheckInRoom(null)}
+            onPrintReceipt={(stayData) => setReceiptData({ stay: stayData, room: checkInRoom })}
           />
         )}
 
@@ -158,6 +168,15 @@ export function App() {
             room={invoiceData.room}
             customBillData={invoiceData.customBillData}
             onClose={() => setInvoiceData(null)}
+          />
+        )}
+
+        {/* Check-in Receipt Modal */}
+        {receiptData && (
+          <CheckInReceiptModal
+            stay={receiptData.stay}
+            room={receiptData.room}
+            onClose={() => setReceiptData(null)}
           />
         )}
 
