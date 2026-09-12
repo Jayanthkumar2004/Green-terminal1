@@ -144,7 +144,7 @@ html.dark body, body.dark {
   }
 }
 
-/* Print Styles for Invoice - Single A4 Page, Top-Left Origin (0,0), No Blank Top Gap, No Extra Page */
+/* Print Styles for Invoice - Single A4 Page, Top-Left Origin (0,0), No Gap, No Split */
 @media print {
   @page {
     size: A4 portrait;
@@ -152,10 +152,7 @@ html.dark body, body.dark {
   }
 
   html, 
-  body, 
-  #root,
-  body.dark,
-  html.dark body {
+  body {
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
@@ -168,14 +165,28 @@ html.dark body, body.dark {
     overflow: visible !important;
   }
 
-  body * {
-    visibility: hidden !important;
+  /* Reset all ancestor elements of #printable-invoice to static layout at origin (0,0) */
+  html,
+  body,
+  #root,
+  div:has(#printable-invoice) {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    background: transparent !important;
   }
 
-  .no-print,
-  .no-print * {
+  /* Completely remove all elements that are NOT part of the printable invoice or its ancestor chain */
+  *:not(:has(#printable-invoice)):not(#printable-invoice):not(#printable-invoice *) {
     display: none !important;
-    visibility: hidden !important;
     height: 0 !important;
     width: 0 !important;
     margin: 0 !important;
@@ -183,27 +194,14 @@ html.dark body, body.dark {
     overflow: hidden !important;
   }
 
-  /* Reset all parent containers of #printable-invoice to prevent flex/my-auto from pushing invoice down */
-  body:has(#printable-invoice),
-  #root:has(#printable-invoice),
-  div:has(> #printable-invoice),
-  div:has(#printable-invoice) {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
-    position: static !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    transform: none !important;
-  }
-
+  /* Ensure invoice and its children are visible and positioned at origin */
   #printable-invoice, 
   #printable-invoice * {
     visibility: visible !important;
   }
 
   #printable-invoice {
+    display: block !important;
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
@@ -217,7 +215,7 @@ html.dark body, body.dark {
     background-color: #ffffff !important;
     color: #000000 !important;
     box-sizing: border-box !important;
-    z-index: 9999999 !important;
+    z-index: 99999999 !important;
     page-break-after: avoid !important;
     page-break-before: avoid !important;
     page-break-inside: avoid !important;
@@ -226,7 +224,7 @@ html.dark body, body.dark {
     break-inside: avoid !important;
   }
 
-  /* Preserve layout display modes within printable invoice */
+  /* Preserve grid/flex/table display modes within printable invoice */
   #printable-invoice .grid {
     display: grid !important;
   }
