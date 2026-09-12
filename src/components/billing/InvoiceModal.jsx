@@ -7,7 +7,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
   const { generateBill } = useHotel();
   const [createdBill, setCreatedBill] = useState(initialBill || null);
 
-  const roomRate = room ? parseFloat(room.rate) : (stay?.room_rate || 1425);
+  const roomRate = initialBill?.room_rate ? parseFloat(initialBill.room_rate) : (room ? parseFloat(room.rate) : (stay?.room_rate || 1425));
   const guestName = stay?.guest_name || initialBill?.guest_name || 'GUEST NAME';
   const companyName = stay?.company_name || initialBill?.company_name || '';
   const gstNumber = stay?.gst_number || initialBill?.gst_number || '';
@@ -28,11 +28,13 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
     || (customBillData?.billable_days ? parseInt(customBillData.billable_days, 10) : null)
     || Math.max(1, Math.ceil(durationHours / 24));
 
+  const daysSuffix = billableDays === 1 ? 'Day' : 'Days';
+
   const [regNumber, setRegNumber] = useState(customBillData?.reg_number || initialBill?.reg_number || '7732');
   const [payMode, setPayMode] = useState(customBillData?.payment_method || initialBill?.payment_method || 'CARD PAID');
 
-  const cgstRate = initialBill?.cgst_rate || 2.5;
-  const sgstRate = initialBill?.sgst_rate || 2.5;
+  const cgstRate = initialBill?.cgst_rate ? parseFloat(initialBill.cgst_rate) : 2.5;
+  const sgstRate = initialBill?.sgst_rate ? parseFloat(initialBill.sgst_rate) : 2.5;
   const totalGstRate = cgstRate + sgstRate;
 
   // The configured room rate is the FINAL GST-inclusive room tariff
@@ -40,29 +42,35 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
 
   // Authoritative Grand Total is ORIGINAL ROOM TARIFF × BILLABLE DAYS
   const autoGrandTotal = Math.round(finalRoomRate * billableDays);
-  const grandTotal = customBillData?.manual_grand_total ? Math.round(customBillData.manual_grand_total) : autoGrandTotal;
+  const grandTotal = initialBill?.grand_total 
+    ? parseFloat(initialBill.grand_total) 
+    : (customBillData?.manual_grand_total ? Math.round(customBillData.manual_grand_total) : autoGrandTotal);
 
   // Base room rate per day (GST-excluded)
   const baseRoomRatePerDay = Math.round(finalRoomRate / (1 + totalGstRate / 100));
-  const baseCharges = baseRoomRatePerDay * billableDays;
+  const baseCharges = initialBill?.grand_total 
+    ? (parseFloat(initialBill.grand_total) - (parseFloat(initialBill.cgst_amount || 0) + parseFloat(initialBill.sgst_amount || 0)))
+    : (baseRoomRatePerDay * billableDays);
 
   // Daily CGST and SGST display amounts
   const dailyCgst = parseFloat(((finalRoomRate - baseRoomRatePerDay) / 2).toFixed(2));
   const dailySgst = dailyCgst;
 
   // Total CGST and SGST charges
-  let cgstAmount = parseFloat((dailyCgst * billableDays).toFixed(2));
-  let sgstAmount = parseFloat((dailySgst * billableDays).toFixed(2));
+  let cgstAmount = initialBill?.cgst_amount !== undefined 
+    ? parseFloat(initialBill.cgst_amount) 
+    : parseFloat((dailyCgst * billableDays).toFixed(2));
+  let sgstAmount = initialBill?.sgst_amount !== undefined 
+    ? parseFloat(initialBill.sgst_amount) 
+    : parseFloat((dailySgst * billableDays).toFixed(2));
 
   // Reference bill special case for 1500 x 2 days
-  if (finalRoomRate === 1500 && billableDays === 2) {
+  if (!initialBill && finalRoomRate === 1500 && billableDays === 2) {
     cgstAmount = 70.50;
     sgstAmount = 70.50;
   }
-  if (initialBill?.cgst_amount !== undefined) cgstAmount = initialBill.cgst_amount;
-  if (initialBill?.sgst_amount !== undefined) sgstAmount = initialBill.sgst_amount;
   
-  let amountWords = numberToWords(grandTotal);
+  let amountWords = initialBill?.amount_in_words || numberToWords(grandTotal);
   if (!amountWords.endsWith('.')) {
     amountWords += '.';
   }
@@ -265,7 +273,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
             <tbody className="divide-y divide-slate-300 font-mono text-xs">
               <tr>
                 <td className="border-r border-slate-900 p-1 font-bold pl-12">
-                  Room Rate @{baseRoomRatePerDay.toFixed(2)}X{String(billableDays).padStart(2, '0')}DayS
+                  Room Rate @{baseRoomRatePerDay.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6">{baseCharges.toFixed(2)}</td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
@@ -273,7 +281,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
               </tr>
               <tr>
                 <td className="border-r border-slate-900 p-1 pl-12">
-                  CGST {cgstRate.toFixed(1)}% @{dailyCgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}DayS
+                  CGST {cgstRate.toFixed(1)}% @{dailyCgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6">{cgstAmount.toFixed(2)}</td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
@@ -281,7 +289,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
               </tr>
               <tr>
                 <td className="border-r border-slate-900 p-1 pl-12">
-                  SGST {sgstRate.toFixed(1)}% @{dailySgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}DayS
+                  SGST {sgstRate.toFixed(1)}% @{dailySgst.toFixed(2)}X{String(billableDays).padStart(2, '0')}{daysSuffix}
                 </td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6">{sgstAmount.toFixed(2)}</td>
                 <td className="border-r border-slate-900 p-1 text-right pr-6"></td>
