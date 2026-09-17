@@ -114,7 +114,8 @@ export const RoomActionModal = ({
         check_in: new Date(editFormData.check_in).toISOString(),
         room_rate: parseFloat(editFormData.room_rate) || room.rate,
         category: editFormData.category || room.room_type || 'AC',
-        receipt_number: editFormData.receipt_number
+        receipt_number: editFormData.receipt_number,
+        dismissed_checkout_cycle: 0
       };
 
       await editActiveStay(activeStay.id, updatedFields);

@@ -495,16 +495,22 @@ export const HotelProvider = ({ children }) => {
 
   // EDIT ACTIVE STAY DETAILS
   const editActiveStay = async (stayId, updatedFields) => {
+    const payload = {
+      dismissed_checkout_cycle: 0,
+      ...updatedFields
+    };
+
     if (isSupabaseConfigured && supabase && isUUID(stayId)) {
       try {
-        const dbPayload = { ...updatedFields };
+        const dbPayload = { ...payload };
         const { error } = await supabase.from('stays').update(dbPayload).eq('id', stayId);
         if (error) {
           console.warn('Supabase stays update note:', error.message);
-          // Fallback if category or receipt_number column is not in Supabase stays table schema
+          // Fallback if category, receipt_number, or dismissed_checkout_cycle column is not in Supabase stays table schema
           if (error.code === 'PGRST204') {
             delete dbPayload.category;
             delete dbPayload.receipt_number;
+            delete dbPayload.dismissed_checkout_cycle;
             await supabase.from('stays').update(dbPayload).eq('id', stayId);
           }
         }
@@ -513,7 +519,7 @@ export const HotelProvider = ({ children }) => {
       }
     }
 
-    setStays(prev => prev.map(s => s.id === stayId ? { ...s, ...updatedFields } : s));
+    setStays(prev => prev.map(s => s.id === stayId ? { ...s, ...payload } : s));
   };
 
   // CONTINUE STAY FOR CURRENT 24H CYCLE
