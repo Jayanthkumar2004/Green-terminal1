@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { X, CalendarCheck, UserCheck, LogOut, Receipt, Printer, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench } from 'lucide-react';
+import { X, CalendarCheck, UserCheck, LogOut, Receipt, Printer, Sparkles, CheckCircle2, User, Building, Phone, Hash, Edit3, Save, Wrench, Clock } from 'lucide-react';
 import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
 
 export const RoomActionModal = ({ 
