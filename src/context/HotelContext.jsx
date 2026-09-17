@@ -722,6 +722,16 @@ export const HotelProvider = ({ children }) => {
     ));
   };
 
+  const isStayReadyToCheckout = (stay) => {
+    if (!stay || stay.status !== 'CHECKED_IN' || !stay.check_in) return false;
+    const checkInMs = new Date(stay.check_in).getTime();
+    const diffMs = Math.max(0, now.getTime() - checkInMs);
+    const durationHours = diffMs / (1000 * 60 * 60);
+    const highestReachedCycle = Math.floor((durationHours + 4) / 24);
+    const dismissedCycle = stay.dismissed_checkout_cycle || 0;
+    return highestReachedCycle >= 1 && highestReachedCycle > dismissedCycle;
+  };
+
   // PAYMENT RECEIPTS CRUD ACTIONS
   const createPaymentReceipt = async (receiptData) => {
     const newReceipt = {
@@ -823,6 +833,7 @@ export const HotelProvider = ({ children }) => {
       clearAllHistory,
       getRoomActiveStay,
       getRoomActiveBooking,
+      isStayReadyToCheckout,
       now
     }}>
       {children}

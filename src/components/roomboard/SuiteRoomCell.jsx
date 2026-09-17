@@ -3,7 +3,7 @@ import { useHotel } from '../../context/HotelContext';
 import { Sparkles, CheckCircle2, Wrench } from 'lucide-react';
 
 export const SuiteRoomCell = ({ room, onSelectRoom }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, setRoomMaintenance, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, isStayReadyToCheckout, markRoomClean, setRoomMaintenance, now } = useHotel();
 
   if (!room) return null;
 
@@ -14,11 +14,14 @@ export const SuiteRoomCell = ({ room, onSelectRoom }) => {
   const isCheckedIn = !isMaintenance && Boolean(activeStay);
   const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isReadyToCheckout = isCheckedIn && isStayReadyToCheckout ? isStayReadyToCheckout(activeStay) : false;
 
   let bgStyle = 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 shadow-[4px_4px_10px_rgba(5,150,105,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
   
   if (isMaintenance) {
     bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
+  } else if (isReadyToCheckout) {
+    bgStyle = 'bg-pink-600 text-white border-pink-700 hover:bg-pink-700 shadow-[4px_4px_12px_rgba(219,39,119,0.65),inset_1px_1px_2px_rgba(255,255,255,0.5)] animate-pulse';
   } else if (isCheckedIn) {
     bgStyle = 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700 shadow-[4px_4px_10px_rgba(37,99,235,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]';
   } else if (isBooked) {
@@ -61,7 +64,11 @@ export const SuiteRoomCell = ({ room, onSelectRoom }) => {
               GUEST: {activeStay.guest_name}
             </div>
             <div className="text-[10px] font-mono font-bold">
-              CHECKED-IN • DURATION: {durationText}
+              {isReadyToCheckout ? (
+                <span className="bg-white text-pink-700 px-1.5 py-0.5 rounded font-black uppercase">CHECKOUT DUE • DURATION: {durationText}</span>
+              ) : (
+                `CHECKED-IN • DURATION: ${durationText}`
+              )}
             </div>
           </div>
         ) : isBooked ? (

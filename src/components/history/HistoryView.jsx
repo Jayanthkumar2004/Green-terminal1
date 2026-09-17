@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { useHotel } from '../../context/HotelContext';
 import { History, UserCheck, CalendarCheck, Receipt, Search, Printer, Trash2, Download, ShieldAlert, Calendar } from 'lucide-react';
 import { InvoiceModal } from '../billing/InvoiceModal';
+import { BillChoiceModal } from '../modals/BillChoiceModal';
 
 export const HistoryView = () => {
   const { stays, bookings, bills, rooms, deleteStay, deleteBooking, deleteBill, clearAllHistory } = useHotel();
   const [activeSubTab, setActiveSubTab] = useState('stays');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Printing & Choice Modal States
   const [selectedBill, setSelectedBill] = useState(null);
+  const [billChoiceData, setBillChoiceData] = useState(null);
+  const [customInvoiceData, setCustomInvoiceData] = useState(null);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const thirtyDaysAgoStr = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -17,6 +22,18 @@ export const HistoryView = () => {
 
   const [deletingItem, setDeletingItem] = useState(null);
   const [showClearAllModal, setShowClearAllModal] = useState(false);
+
+  const getRoomObject = (roomId, roomNumber) => {
+    if (roomId) {
+      const r = rooms.find(room => room.id === roomId);
+      if (r) return r;
+    }
+    if (roomNumber) {
+      const r = rooms.find(room => String(room.room_number).trim() === String(roomNumber).trim());
+      if (r) return r;
+    }
+    return { room_number: roomNumber || '1003', rate: 1425, room_type: 'AC' };
+  };
 
   const getRoomNumber = (roomId) => {
     const r = rooms.find(room => room.id === roomId);
@@ -157,18 +174,6 @@ export const HistoryView = () => {
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
       <head>
         <meta charset="utf-8" />
-        <!--[if gte mso 9]>
-        <xml>
-          <x:ExcelWorkbook>
-            <x:ExcelWorksheets>
-              <x:ExcelWorksheet>
-                <x:Name>Green Terminal ${activeSubTab}</x:Name>
-                <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-              </x:ExcelWorksheet>
-            </x:ExcelWorksheets>
-          </x:ExcelWorkbook>
-        </xml>
-        <![endif]-->
         <style>
           body { font-family: Arial, sans-serif; font-size: 12px; }
           table { border-collapse: collapse; width: 100%; }
@@ -216,6 +221,31 @@ export const HistoryView = () => {
   const handleClearAllConfirm = async () => {
     await clearAllHistory();
     setShowClearAllModal(false);
+  };
+
+  const handleOpenPrintChoiceForStay = (stay) => {
+    const roomObj = getRoomObject(stay.room_id, stay.room_number);
+    setBillChoiceData({ stay, room: roomObj });
+  };
+
+  const handleOpenPrintChoiceForBill = (bill) => {
+    const roomObj = getRoomObject(bill.room_id, bill.room_number);
+    const stayObj = {
+      guest_name: bill.guest_name,
+      phone: bill.phone,
+      company_name: bill.company_name,
+      gst_number: bill.gst_number,
+      check_in: bill.check_in,
+      check_out: bill.check_out,
+      room_rate: bill.room_rate,
+      room_number: bill.room_number
+    };
+    setBillChoiceData({ stay: stayObj, room: roomObj, initialBill: bill });
+  };
+
+  const handleConfirmBillChoice = ({ stay, room, customBillData, isManual }) => {
+    setBillChoiceData(null);
+    setCustomInvoiceData({ stay, room, customBillData });
   };
 
   return (
@@ -435,10 +465,18 @@ export const HistoryView = () => {
                             {stay.status}
                           </span>
                         </td>
-                        <td className="p-3 text-right">
+                        <td className="p-3 text-right space-x-1.5">
+                          <button
+                            onClick={() => handleOpenPrintChoiceForStay(stay)}
+                            className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-[11px] inline-flex items-center gap-1 shadow-sm"
+                            title="Print Bill (Automatic / Manual Choice)"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Print Bill</span>
+                          </button>
                           <button
                             onClick={() => setDeletingItem({ id: stay.id, type: 'stay', label: `Stay for ${stay.guest_name} (Room ${roomNum})` })}
-                            className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded transition-colors"
+                            className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded transition-colors inline-block align-middle"
                             title="Delete Stay Record"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -551,13 +589,14 @@ export const HistoryView = () => {
                       <td className="p-3 font-bold text-slate-800 dark:text-slate-200">{bill.billable_days}</td>
                       <td className="p-3 font-mono font-black text-slate-900 dark:text-white">₹{bill.grand_total}</td>
                       <td className="p-3 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400">{bill.payment_method}</td>
-                      <td className="p-3 text-right space-x-2">
+                      <td className="p-3 text-right space-x-1.5">
                         <button
-                          onClick={() => setSelectedBill(bill)}
+                          onClick={() => handleOpenPrintChoiceForBill(bill)}
                           className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-[11px] inline-flex items-center gap-1 shadow-sm"
+                          title="Print Bill (Automatic / Manual Option)"
                         >
                           <Printer className="w-3.5 h-3.5" />
-                          <span>Re-Print</span>
+                          <span>Print Bill</span>
                         </button>
                         <button
                           onClick={() => setDeletingItem({ id: bill.id, type: 'bill', label: `Bill #${bill.bill_number} for ${bill.guest_name}` })}
@@ -576,7 +615,27 @@ export const HistoryView = () => {
         </div>
       )}
 
-      {/* Invoice Modal for selected bill */}
+      {/* Bill Choice Modal (Automatic vs Manual Option) */}
+      {billChoiceData && (
+        <BillChoiceModal
+          stay={billChoiceData.stay}
+          room={billChoiceData.room}
+          onClose={() => setBillChoiceData(null)}
+          onConfirmBill={handleConfirmBillChoice}
+        />
+      )}
+
+      {/* Invoice Modal for Custom / Choice Bill */}
+      {customInvoiceData && (
+        <InvoiceModal
+          stay={customInvoiceData.stay}
+          room={customInvoiceData.room}
+          customBillData={customInvoiceData.customBillData}
+          onClose={() => setCustomInvoiceData(null)}
+        />
+      )}
+
+      {/* Invoice Modal for Direct Selected Bill */}
       {selectedBill && (
         <InvoiceModal
           initialBill={selectedBill}

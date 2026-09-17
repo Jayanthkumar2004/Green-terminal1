@@ -288,15 +288,6 @@ export const PaymentReceiptsSection = () => {
           </button>
 
           <button
-            onClick={() => handleOpenEdit(null)}
-            className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow transition-all"
-            title="Edit Manual Payment Receipt Details"
-          >
-            <Edit3 className="w-4 h-4" />
-            <span>EDIT MANUAL RECEIPT</span>
-          </button>
-
-          <button
             onClick={handleOpenAdd}
             className="flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs shadow transition-all"
             title="Create & Print Manual Payment Receipt"

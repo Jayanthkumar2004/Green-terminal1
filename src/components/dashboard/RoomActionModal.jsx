@@ -12,7 +12,7 @@ export const RoomActionModal = ({
   onGenerateBill,
   onPrintReceipt
 }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, markRoomCleaning, setRoomMaintenance, editActiveStay, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, isStayReadyToCheckout, continueStayCycle, markRoomClean, markRoomCleaning, setRoomMaintenance, editActiveStay, now } = useHotel();
 
   if (!room) return null;
 
@@ -23,6 +23,7 @@ export const RoomActionModal = ({
   const isCheckedIn = !isMaintenance && Boolean(activeStay);
   const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isReadyToCheckout = isCheckedIn && isStayReadyToCheckout ? isStayReadyToCheckout(activeStay) : false;
 
   // Helper for local datetime string
   const getNowLocalStr = () => {
@@ -83,6 +84,7 @@ export const RoomActionModal = ({
   }
 
   const formatStatusBadge = () => {
+    if (isReadyToCheckout) return <span className="bg-pink-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm animate-pulse">READY TO CHECKOUT (PINK)</span>;
     if (isCheckedIn) return <span className="bg-blue-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm">CHECKED-IN (BLUE)</span>;
     if (isBooked) return <span className="bg-rose-600 text-white font-black px-3 py-1 rounded-full text-xs shadow-sm">BOOKED (RED)</span>;
     if (isCleaning) return <span className="bg-amber-400 text-slate-950 font-black px-3 py-1 rounded-full text-xs shadow-sm flex items-center gap-1"><Sparkles className="w-3.5 h-3.5" /> YET TO CLEAN (YELLOW)</span>;
@@ -160,6 +162,32 @@ export const RoomActionModal = ({
             <span className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400">Current Room Status</span>
             {formatStatusBadge()}
           </div>
+
+          {/* Special Ready to Checkout Banner if room is READY TO CHECKOUT */}
+          {isReadyToCheckout && activeStay && (
+            <div className="bg-pink-100 dark:bg-pink-950/60 p-4 rounded-xl border-2 border-pink-500 dark:border-pink-600 space-y-3 text-center">
+              <div className="flex items-center justify-center gap-2 text-pink-950 dark:text-pink-100 font-black text-sm uppercase">
+                <Clock className="w-5 h-5 text-pink-600 dark:text-pink-400 animate-bounce" />
+                <span>Room is Ready to Checkout (Pink Status)</span>
+              </div>
+              <p className="text-xs text-pink-900 dark:text-pink-200 font-medium">
+                Guest 24-hour cycle threshold reached. Click Continue Stay to extend stay and return room card to original BLUE color.
+              </p>
+              <button
+                onClick={() => {
+                  const checkInMs = new Date(activeStay.check_in).getTime();
+                  const diffMs = Math.max(0, now.getTime() - checkInMs);
+                  const durationHours = diffMs / (1000 * 60 * 60);
+                  const highestReachedCycle = Math.floor((durationHours + 4) / 24);
+                  continueStayCycle(activeStay.id, highestReachedCycle);
+                }}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl text-xs uppercase shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                <span>CONTINUE STAY (RESTORE BLUE COLOR)</span>
+              </button>
+            </div>
+          )}
 
           {/* Special Cleaning Banner if room is YET_TO_CLEAN */}
           {isCleaning && (

@@ -3,7 +3,7 @@ import { useHotel } from '../../context/HotelContext';
 import { Sparkles, CheckCircle2, Clock, Wrench } from 'lucide-react';
 
 export const RoomCell = ({ room, onSelectRoom }) => {
-  const { getRoomActiveStay, getRoomActiveBooking, markRoomClean, setRoomMaintenance, now } = useHotel();
+  const { getRoomActiveStay, getRoomActiveBooking, isStayReadyToCheckout, markRoomClean, setRoomMaintenance, now } = useHotel();
 
   const activeStay = getRoomActiveStay(room.id);
   const activeBooking = getRoomActiveBooking(room.id);
@@ -12,12 +12,15 @@ export const RoomCell = ({ room, onSelectRoom }) => {
   const isCheckedIn = !isMaintenance && Boolean(activeStay);
   const isBooked = !isMaintenance && !isCheckedIn && Boolean(activeBooking);
   const isCleaning = !isMaintenance && !isCheckedIn && !isBooked && (room.status === 'OUT_FOR_CLEANING' || room.status === 'YET_TO_CLEAN');
+  const isReadyToCheckout = isCheckedIn && isStayReadyToCheckout ? isStayReadyToCheckout(activeStay) : false;
 
   // Deep Bold 3D Claymorphic Color Scheme
   let bgStyle = 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700 shadow-[4px_4px_10px_rgba(5,150,105,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // GREEN for AVAILABLE
 
   if (isMaintenance) {
     bgStyle = 'bg-orange-600 text-white border-orange-700 hover:bg-orange-700 shadow-[4px_4px_10px_rgba(234,88,12,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // ORANGE for MAINTENANCE
+  } else if (isReadyToCheckout) {
+    bgStyle = 'bg-pink-600 text-white border-pink-700 hover:bg-pink-700 shadow-[4px_4px_12px_rgba(219,39,119,0.65),inset_1px_1px_2px_rgba(255,255,255,0.5)] animate-pulse'; // PINK for READY TO CHECKOUT
   } else if (isCheckedIn) {
     bgStyle = 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700 shadow-[4px_4px_10px_rgba(37,99,235,0.45),inset_1px_1px_2px_rgba(255,255,255,0.5)]'; // BLUE for CHECKED-IN
   } else if (isBooked) {
@@ -64,7 +67,7 @@ export const RoomCell = ({ room, onSelectRoom }) => {
     >
       {/* Header: Room # & Type */}
       <div className="flex items-center justify-between border-b border-white/20 pb-0.5">
-        <span className="font-mono font-black text-xs md:text-sm tracking-wider leading-none">
+        <span className="font-mono font-black text-xs md:text-sm tracking-wider leading-none flex items-center gap-1">
           {room.room_number}
         </span>
         <span className="text-[9px] font-extrabold tracking-tight bg-black/20 px-1 py-0.2 rounded leading-none">
@@ -137,8 +140,8 @@ export const RoomCell = ({ room, onSelectRoom }) => {
               <Clock className="w-2.5 h-2.5 opacity-80" />
               {durationText}
             </span>
-            <span className="text-[8px] font-sans font-extrabold uppercase bg-black/30 px-1 rounded">
-              IN
+            <span className={`text-[8px] font-sans font-extrabold uppercase px-1 rounded ${isReadyToCheckout ? 'bg-white text-pink-700 font-black animate-pulse' : 'bg-black/30 text-white'}`}>
+              {isReadyToCheckout ? 'CHECKOUT DUE' : 'IN'}
             </span>
           </>
         ) : isBooked ? (
