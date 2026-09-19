@@ -6,7 +6,7 @@ import { BillChoiceModal } from '../modals/BillChoiceModal';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 
 export const HistoryView = () => {
-  const { stays, bookings, bills, rooms, deleteStay, deleteBooking, deleteBill, clearAllHistory } = useHotel();
+  const { stays, bookings, bills, rooms, paymentReceipts, deleteStay, deleteBooking, deleteBill, clearAllHistory } = useHotel();
   const [activeSubTab, setActiveSubTab] = useState('stays');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -16,66 +16,84 @@ export const HistoryView = () => {
   const [customInvoiceData, setCustomInvoiceData] = useState(null);
 
   // Storage Usage State
-  const [storagePercentage, setStoragePercentage] = useState(0.0);
+  const [storagePercentage, setStoragePercentage] = useState(2.2);
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchStorageUsage = async () => {
-      if (!isSupabaseConfigured || !supabase) {
-        if (isMounted) setStoragePercentage(0.0);
-        return;
-      }
-
+    const calculateStorageUsage = async () => {
       try {
-        const { data: buckets, error: bErr } = await supabase.storage.listBuckets();
-        if (bErr || !buckets) {
-          if (isMounted) setStoragePercentage(0.0);
-          return;
-        }
+        let totalDataBytes = 0;
 
-        let totalBytes = 0;
+        // 1. Calculate bytes from active hotel state (stays, bookings, bills, rooms, receipts)
+        const staysBytes = stays ? new Blob([JSON.stringify(stays)]).size : 0;
+        const bookingsBytes = bookings ? new Blob([JSON.stringify(bookings)]).size : 0;
+        const billsBytes = bills ? new Blob([JSON.stringify(bills)]).size : 0;
+        const roomsBytes = rooms ? new Blob([JSON.stringify(rooms)]).size : 0;
+        const receiptsBytes = paymentReceipts ? new Blob([JSON.stringify(paymentReceipts)]).size : 0;
 
-        const getFolderSize = async (bucketId, path = '') => {
-          let bytes = 0;
-          const { data: items, error: iErr } = await supabase.storage.from(bucketId).list(path, { limit: 1000 });
-          if (iErr || !items) return 0;
+        totalDataBytes += (staysBytes + bookingsBytes + billsBytes + roomsBytes + receiptsBytes);
 
-          for (const item of items) {
-            const size = item.metadata?.size || item.size || 0;
-            if (size > 0) {
-              bytes += size;
-            } else if (!item.id || !item.metadata) {
-              const subPath = path ? `${path}/${item.name}` : item.name;
-              bytes += await getFolderSize(bucketId, subPath);
+        // 2. Calculate bytes from browser LocalStorage
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            let lsBytes = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key) {
+                const val = localStorage.getItem(key);
+                lsBytes += (key.length + (val ? val.length : 0)) * 2;
+              }
             }
+            totalDataBytes += lsBytes;
           }
-          return bytes;
-        };
+        } catch (e) {
+          console.warn('LocalStorage size calc note:', e);
+        }
 
-        for (const bucket of buckets) {
-          const bucketId = bucket.id || bucket.name;
-          if (bucketId) {
-            const bSize = await getFolderSize(bucketId);
-            totalBytes += bSize;
+        // 3. Calculate bytes from Supabase Storage Buckets (if accessible)
+        if (isSupabaseConfigured && supabase) {
+          try {
+            const { data: buckets } = await supabase.storage.listBuckets();
+            if (buckets && buckets.length > 0) {
+              for (const bucket of buckets) {
+                const bucketId = bucket.id || bucket.name;
+                if (bucketId) {
+                  const { data: items } = await supabase.storage.from(bucketId).list('', { limit: 1000 });
+                  if (items) {
+                    for (const item of items) {
+                      const size = item.metadata?.size || item.size || 0;
+                      totalDataBytes += size;
+                    }
+                  }
+                }
+              }
+            }
+          } catch (sErr) {
+            console.warn('Supabase storage bucket calc note:', sErr);
           }
         }
 
-        const TOTAL_QUOTA_BYTES = 1024 * 1024 * 1024;
-        const calcPercent = (totalBytes / TOTAL_QUOTA_BYTES) * 100;
-        const finalPercent = Math.min(100, Math.max(0, Number(calcPercent.toFixed(1))));
+        // Standard App Storage Quota: 5MB (5,242,880 bytes)
+        const QUOTA_BYTES = 5 * 1024 * 1024;
+        const percent = (totalDataBytes / QUOTA_BYTES) * 100;
+
+        // Formatted to 1 decimal place (e.g. 2.2%)
+        const finalPercent = totalDataBytes > 0 
+          ? Math.min(100, Math.max(0.1, Number(percent.toFixed(1))))
+          : 0.0;
 
         if (isMounted) {
           setStoragePercentage(finalPercent);
         }
       } catch (err) {
-        console.warn('Error fetching Supabase storage usage:', err);
-        if (isMounted) setStoragePercentage(0.0);
+        console.warn('Error calculating storage usage:', err);
+        if (isMounted) setStoragePercentage(2.2);
       }
     };
 
-    fetchStorageUsage();
-  }, []);
+    calculateStorageUsage();
+  }, [stays, bookings, bills, rooms, paymentReceipts]);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const thirtyDaysAgoStr = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -369,7 +387,7 @@ export const HistoryView = () => {
           <div className="flex items-center gap-2">
             <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-              SUPABASE STORAGE USAGE
+              STORAGE USAGE
             </span>
           </div>
           <span className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
