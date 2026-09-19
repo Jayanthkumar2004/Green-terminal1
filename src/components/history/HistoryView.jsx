@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { History, UserCheck, CalendarCheck, Receipt, Search, Printer, Trash2, Download, ShieldAlert, Calendar } from 'lucide-react';
+import { History, UserCheck, CalendarCheck, Receipt, Search, Printer, Trash2, Download, ShieldAlert, Calendar, HardDrive } from 'lucide-react';
 import { InvoiceModal } from '../billing/InvoiceModal';
 import { BillChoiceModal } from '../modals/BillChoiceModal';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 
 export const HistoryView = () => {
   const { stays, bookings, bills, rooms, deleteStay, deleteBooking, deleteBill, clearAllHistory } = useHotel();
@@ -13,6 +14,68 @@ export const HistoryView = () => {
   const [selectedBill, setSelectedBill] = useState(null);
   const [billChoiceData, setBillChoiceData] = useState(null);
   const [customInvoiceData, setCustomInvoiceData] = useState(null);
+
+  // Storage Usage State
+  const [storagePercentage, setStoragePercentage] = useState(0.0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchStorageUsage = async () => {
+      if (!isSupabaseConfigured || !supabase) {
+        if (isMounted) setStoragePercentage(0.0);
+        return;
+      }
+
+      try {
+        const { data: buckets, error: bErr } = await supabase.storage.listBuckets();
+        if (bErr || !buckets) {
+          if (isMounted) setStoragePercentage(0.0);
+          return;
+        }
+
+        let totalBytes = 0;
+
+        const getFolderSize = async (bucketId, path = '') => {
+          let bytes = 0;
+          const { data: items, error: iErr } = await supabase.storage.from(bucketId).list(path, { limit: 1000 });
+          if (iErr || !items) return 0;
+
+          for (const item of items) {
+            const size = item.metadata?.size || item.size || 0;
+            if (size > 0) {
+              bytes += size;
+            } else if (!item.id || !item.metadata) {
+              const subPath = path ? `${path}/${item.name}` : item.name;
+              bytes += await getFolderSize(bucketId, subPath);
+            }
+          }
+          return bytes;
+        };
+
+        for (const bucket of buckets) {
+          const bucketId = bucket.id || bucket.name;
+          if (bucketId) {
+            const bSize = await getFolderSize(bucketId);
+            totalBytes += bSize;
+          }
+        }
+
+        const TOTAL_QUOTA_BYTES = 1024 * 1024 * 1024;
+        const calcPercent = (totalBytes / TOTAL_QUOTA_BYTES) * 100;
+        const finalPercent = Math.min(100, Math.max(0, Number(calcPercent.toFixed(1))));
+
+        if (isMounted) {
+          setStoragePercentage(finalPercent);
+        }
+      } catch (err) {
+        console.warn('Error fetching Supabase storage usage:', err);
+        if (isMounted) setStoragePercentage(0.0);
+      }
+    };
+
+    fetchStorageUsage();
+  }, []);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const thirtyDaysAgoStr = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -297,6 +360,27 @@ export const HistoryView = () => {
             <Trash2 className="w-4 h-4" />
             <span>CLEAR ALL DATA</span>
           </button>
+        </div>
+      </div>
+
+      {/* Horizontal Supabase Storage Usage Progress Bar */}
+      <div className="clay-card p-3 sm:p-4 border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              SUPABASE STORAGE USAGE
+            </span>
+          </div>
+          <span className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+            {storagePercentage.toFixed(1)}%
+          </span>
+        </div>
+        <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 shadow-inner border border-slate-300/50 dark:border-slate-700/50">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 ease-out shadow-sm"
+            style={{ width: `${Math.max(storagePercentage, 0.5)}%` }}
+          />
         </div>
       </div>
 
