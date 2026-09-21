@@ -205,14 +205,14 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
-                    Pax (Persons)
+                    Pax (Optional)
                   </label>
                   <input
                     type="number"
                     min="1"
                     max="20"
-                    required
                     className="clay-input w-full px-3 py-1.5 text-xs font-bold"
+                    placeholder="01"
                     value={manualData.pax}
                     onChange={(e) => setManualData({ ...manualData, pax: e.target.value })}
                   />

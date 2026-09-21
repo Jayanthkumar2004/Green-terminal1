@@ -376,13 +376,13 @@ export const RoomActionModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">No. of Persons (Pax)</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">No. of Persons (Optional)</label>
                   <input
                     type="number"
                     min="1"
                     max="20"
-                    required
                     className="clay-input w-full px-2.5 py-1.5 text-xs font-bold"
+                    placeholder="01"
                     value={editFormData.pax}
                     onChange={(e) => setEditFormData({ ...editFormData, pax: e.target.value })}
                   />

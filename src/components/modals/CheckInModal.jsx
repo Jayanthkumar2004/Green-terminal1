@@ -141,7 +141,7 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                No. of Persons (Pax) *
+                No. of Persons (Pax) (Optional)
               </label>
               <div className="relative">
                 <Users className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -149,7 +149,6 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
                   type="number"
                   min="1"
                   max="20"
-                  required
                   className="clay-input w-full pl-9 pr-3 py-2 text-sm font-bold"
                   placeholder="01"
                   value={formData.pax}
