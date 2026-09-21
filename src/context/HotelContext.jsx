@@ -455,10 +455,12 @@ export const HotelProvider = ({ children }) => {
     const newStay = {
       id: crypto.randomUUID(),
       room_id: checkInData.room_id,
+      room_number: checkInData.room_number,
       guest_name: checkInData.guest_name.toUpperCase(),
       phone: checkInData.phone || '',
       company_name: checkInData.company_name || '',
       gst_number: checkInData.gst_number || '',
+      pax: checkInData.pax || '01',
       check_in: checkInData.check_in || new Date().toISOString(),
       status: 'CHECKED_IN',
       room_rate: checkInData.rate || 1425
@@ -470,6 +472,7 @@ export const HotelProvider = ({ children }) => {
         phone: newStay.phone,
         company_name: newStay.company_name,
         gst_number: newStay.gst_number,
+        pax: newStay.pax,
         check_in: newStay.check_in,
         status: 'CHECKED_IN',
         room_rate: newStay.room_rate
@@ -478,9 +481,21 @@ export const HotelProvider = ({ children }) => {
         dbPayload.room_id = newStay.room_id;
       }
 
-      const { data, error } = await supabase.from('stays').insert([dbPayload]).select();
-      if (error) console.error('Check-in DB error:', error);
-      if (data && data[0]) newStay.id = data[0].id;
+      try {
+        const { data, error } = await supabase.from('stays').insert([dbPayload]).select();
+        if (error) {
+          console.warn('Check-in DB note:', error.message);
+          if (error.code === 'PGRST204') {
+            delete dbPayload.pax;
+            const { data: retryData } = await supabase.from('stays').insert([dbPayload]).select();
+            if (retryData && retryData[0]) newStay.id = retryData[0].id;
+          }
+        } else if (data && data[0]) {
+          newStay.id = data[0].id;
+        }
+      } catch (err) {
+        console.warn('Check-in DB error:', err);
+      }
 
       if (isUUID(checkInData.room_id)) {
         await supabase.from('rooms').update({ status: 'CHECKED_IN' }).eq('id', checkInData.room_id);
@@ -506,10 +521,11 @@ export const HotelProvider = ({ children }) => {
         const { error } = await supabase.from('stays').update(dbPayload).eq('id', stayId);
         if (error) {
           console.warn('Supabase stays update note:', error.message);
-          // Fallback if category, receipt_number, or dismissed_checkout_cycle column is not in Supabase stays table schema
+          // Fallback if category, receipt_number, pax, or dismissed_checkout_cycle column is not in Supabase stays table schema
           if (error.code === 'PGRST204') {
             delete dbPayload.category;
             delete dbPayload.receipt_number;
+            delete dbPayload.pax;
             delete dbPayload.dismissed_checkout_cycle;
             await supabase.from('stays').update(dbPayload).eq('id', stayId);
           }

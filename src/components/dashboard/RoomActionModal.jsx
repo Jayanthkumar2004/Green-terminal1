@@ -46,6 +46,7 @@ export const RoomActionModal = ({
     phone: activeStay?.phone || '',
     company_name: activeStay?.company_name || '',
     gst_number: activeStay?.gst_number || '',
+    pax: activeStay?.pax || '01',
     check_in: activeStay?.check_in ? getLocalISOFromDate(new Date(activeStay.check_in)) : getNowLocalStr(),
     room_rate: activeStay?.room_rate || room.rate || 1425,
     category: activeStay?.category || room.room_type || 'AC'
@@ -59,6 +60,7 @@ export const RoomActionModal = ({
         phone: activeStay?.phone || '',
         company_name: activeStay?.company_name || '',
         gst_number: activeStay?.gst_number || '',
+        pax: activeStay?.pax || '01',
         check_in: activeStay?.check_in ? getLocalISOFromDate(new Date(activeStay.check_in)) : getNowLocalStr(),
         room_rate: activeStay?.room_rate || room.rate || 1425,
         category: activeStay?.category || room.room_type || 'AC'
@@ -115,6 +117,7 @@ export const RoomActionModal = ({
         room_rate: parseFloat(editFormData.room_rate) || room.rate,
         category: editFormData.category || room.room_type || 'AC',
         receipt_number: editFormData.receipt_number,
+        pax: editFormData.pax || '01',
         dismissed_checkout_cycle: 0
       };
 
@@ -370,6 +373,18 @@ export const RoomActionModal = ({
                     className="clay-input w-full px-2.5 py-1.5 text-xs uppercase font-semibold"
                     value={editFormData.gst_number}
                     onChange={(e) => setEditFormData({ ...editFormData, gst_number: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">No. of Persons (Pax)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    required
+                    className="clay-input w-full px-2.5 py-1.5 text-xs font-bold"
+                    value={editFormData.pax}
+                    onChange={(e) => setEditFormData({ ...editFormData, pax: e.target.value })}
                   />
                 </div>
                 <div className="col-span-2">

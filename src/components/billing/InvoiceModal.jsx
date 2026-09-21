@@ -33,6 +33,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
 
   const [regNumber, setRegNumber] = useState(customBillData?.reg_number || initialBill?.reg_number || '7732');
   const [payMode, setPayMode] = useState(customBillData?.payment_method || initialBill?.payment_method || 'CARD PAID');
+  const [pax, setPax] = useState(stay?.pax || initialBill?.pax || customBillData?.pax || '01');
 
   const cgstRate = initialBill?.cgst_rate ? parseFloat(initialBill.cgst_rate) : 2.5;
   const sgstRate = initialBill?.sgst_rate ? parseFloat(initialBill.sgst_rate) : 2.5;
@@ -138,6 +139,16 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs">
+              <label className="text-slate-300 font-bold">Pax:</label>
+              <input
+                type="text"
+                className="w-12 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-white font-mono text-xs text-center font-bold"
+                value={pax}
+                onChange={(e) => setPax(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 text-xs">
               <label className="text-slate-300 font-bold">Reg #:</label>
               <input
                 type="text"
@@ -230,7 +241,7 @@ export const InvoiceModal = ({ stay, room, initialBill, customBillData, onClose 
               <div className="grid grid-cols-4 divide-x divide-slate-900 text-center font-mono">
                 <div className="p-1.5 print:p-2 font-bold">{roomNumber}</div>
                 <div className="p-1.5 print:p-2 uppercase">{roomType === 'AC' ? 'STD' : roomType}</div>
-                <div className="p-1.5 print:p-2">1</div>
+                <div className="p-1.5 print:p-2 font-bold">{pax || '01'}</div>
                 <div className="p-1.5 print:p-2">{regNumber}</div>
               </div>
 

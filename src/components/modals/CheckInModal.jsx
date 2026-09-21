@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../context/HotelContext';
-import { X, UserCheck, User, Phone, Building, Hash, Calendar } from 'lucide-react';
+import { X, UserCheck, User, Phone, Building, Hash, Calendar, Users } from 'lucide-react';
 import { QuickDateTimePicker } from '../common/QuickDateTimePicker';
 
 export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
@@ -19,6 +19,7 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
     phone: activeBooking?.phone || '',
     company_name: activeBooking?.company_name || '',
     gst_number: activeBooking?.gst_number || '',
+    pax: activeBooking?.pax || '01',
     check_in: getNowLocalStr(),
     rate: room?.rate || 1425
   });
@@ -31,7 +32,8 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
         guest_name: activeBooking?.guest_name || prev.guest_name,
         phone: activeBooking?.phone || prev.phone,
         company_name: activeBooking?.company_name || prev.company_name,
-        gst_number: activeBooking?.gst_number || prev.gst_number
+        gst_number: activeBooking?.gst_number || prev.gst_number,
+        pax: activeBooking?.pax || prev.pax || '01'
       }));
     }
   }, [room?.id]);
@@ -59,6 +61,7 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
         phone: formData.phone,
         company_name: formData.company_name,
         gst_number: formData.gst_number,
+        pax: formData.pax || '01',
         check_in: selectedCheckInDate.toISOString(),
         room_rate: parseFloat(formData.rate) || room.rate
       };
@@ -119,19 +122,40 @@ export const CheckInModal = ({ room, onClose, onPrintReceipt }) => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Phone Number (Optional)
-            </label>
-            <div className="relative">
-              <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="tel"
-                className="clay-input w-full pl-9 pr-3 py-2 text-sm font-semibold"
-                placeholder="Guest Contact Number"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                Phone Number (Optional)
+              </label>
+              <div className="relative">
+                <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <input
+                  type="tel"
+                  className="clay-input w-full pl-9 pr-3 py-2 text-sm font-semibold"
+                  placeholder="Contact Number"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                No. of Persons (Pax) *
+              </label>
+              <div className="relative">
+                <Users className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  required
+                  className="clay-input w-full pl-9 pr-3 py-2 text-sm font-bold"
+                  placeholder="01"
+                  value={formData.pax}
+                  onChange={(e) => setFormData({ ...formData, pax: e.target.value })}
+                />
+              </div>
             </div>
           </div>
 

@@ -170,6 +170,7 @@ export const HistoryView = () => {
           <th>Guest Name</th>
           <th>Company Name</th>
           <th>Phone</th>
+          <th>Pax</th>
           <th>Check In</th>
           <th>Check Out</th>
           <th>Billable Days</th>
@@ -186,6 +187,7 @@ export const HistoryView = () => {
             <td>${s.guest_name}</td>
             <td>${s.company_name || '-'}</td>
             <td>${s.phone || '-'}</td>
+            <td>${s.pax || '01'}</td>
             <td>${checkIn}</td>
             <td>${checkOut}</td>
             <td>${s.billable_days || 1}</td>
@@ -228,6 +230,7 @@ export const HistoryView = () => {
           <th>Room Number</th>
           <th>Guest Name</th>
           <th>Reg Number</th>
+          <th>Pax</th>
           <th>Billable Days</th>
           <th>Grand Total</th>
           <th>Payment Method</th>
@@ -242,6 +245,7 @@ export const HistoryView = () => {
             <td>${b.room_number}</td>
             <td>${b.guest_name}</td>
             <td>${b.reg_number || '7732'}</td>
+            <td>${b.pax || '01'}</td>
             <td>${b.billable_days}</td>
             <td>₹${b.grand_total}</td>
             <td>${b.payment_method}</td>
@@ -517,6 +521,7 @@ export const HistoryView = () => {
                   <th className="p-3">Guest Name</th>
                   <th className="p-3">Company / GST</th>
                   <th className="p-3">Phone</th>
+                  <th className="p-3">Pax</th>
                   <th className="p-3">Check-In</th>
                   <th className="p-3">Check-Out</th>
                   <th className="p-3">Days</th>
@@ -527,7 +532,7 @@ export const HistoryView = () => {
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
                 {filteredStays.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="p-6 text-center text-slate-500 dark:text-slate-400 font-semibold">
+                    <td colSpan="10" className="p-6 text-center text-slate-500 dark:text-slate-400 font-semibold">
                       No stay history records found for selected dates.
                     </td>
                   </tr>
@@ -549,6 +554,7 @@ export const HistoryView = () => {
                           )}
                         </td>
                         <td className="p-3 font-mono text-slate-800 dark:text-slate-200">{stay.phone || '-'}</td>
+                        <td className="p-3 font-bold font-mono text-slate-800 dark:text-slate-200">{stay.pax || '01'}</td>
                         <td className="p-3 font-mono text-[11px] text-slate-800 dark:text-slate-200">
                           {new Date(stay.check_in).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         </td>
@@ -668,6 +674,7 @@ export const HistoryView = () => {
                   <th className="p-3">Room #</th>
                   <th className="p-3">Guest Name</th>
                   <th className="p-3">Reg #</th>
+                  <th className="p-3">Pax</th>
                   <th className="p-3">Days</th>
                   <th className="p-3">Grand Total</th>
                   <th className="p-3">Payment</th>
@@ -677,7 +684,7 @@ export const HistoryView = () => {
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
                 {filteredBills.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="p-6 text-center text-slate-500 dark:text-slate-400 font-semibold">
+                    <td colSpan="9" className="p-6 text-center text-slate-500 dark:text-slate-400 font-semibold">
                       No generated bills found for selected dates.
                     </td>
                   </tr>
@@ -688,6 +695,7 @@ export const HistoryView = () => {
                       <td className="p-3 font-mono font-black text-slate-900 dark:text-white">{bill.room_number}</td>
                       <td className="p-3 font-bold uppercase text-slate-900 dark:text-white">{bill.guest_name}</td>
                       <td className="p-3 font-mono text-slate-800 dark:text-slate-200">{bill.reg_number || '7732'}</td>
+                      <td className="p-3 font-bold font-mono text-slate-800 dark:text-slate-200">{bill.pax || '01'}</td>
                       <td className="p-3 font-bold text-slate-800 dark:text-slate-200">{bill.billable_days}</td>
                       <td className="p-3 font-mono font-black text-slate-900 dark:text-white">₹{bill.grand_total}</td>
                       <td className="p-3 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400">{bill.payment_method}</td>

@@ -19,6 +19,7 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
     phone: stay?.phone || '',
     company_name: stay?.company_name || '',
     gst_number: stay?.gst_number || '',
+    pax: stay?.pax || '01',
     room_number: room?.room_number || stay?.room_number || '1003',
     room_type: room?.room_type || 'AC',
     room_rate: activeRate,
@@ -47,6 +48,7 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
           phone: manualData.phone,
           company_name: manualData.company_name,
           gst_number: manualData.gst_number,
+          pax: manualData.pax,
           check_in: manualData.check_in,
           check_out: manualData.check_out,
           room_rate: parseFloat(manualData.room_rate) || activeRate
@@ -58,6 +60,7 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
           rate: parseFloat(manualData.room_rate) || activeRate
         },
         customBillData: {
+          pax: manualData.pax,
           reg_number: manualData.reg_number,
           payment_method: manualData.payment_method,
           billable_days: manualData.billable_days ? parseInt(manualData.billable_days, 10) : autoBillableDays,
@@ -187,16 +190,31 @@ export const BillChoiceModal = ({ stay, room, onClose, onConfirmBill }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
-                    Phone (Optional)
+                    Phone
                   </label>
                   <input
                     type="text"
                     className="clay-input w-full px-3 py-1.5 text-xs"
                     value={manualData.phone}
                     onChange={(e) => setManualData({ ...manualData, phone: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300 mb-1">
+                    Pax (Persons)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    required
+                    className="clay-input w-full px-3 py-1.5 text-xs font-bold"
+                    value={manualData.pax}
+                    onChange={(e) => setManualData({ ...manualData, pax: e.target.value })}
                   />
                 </div>
 
